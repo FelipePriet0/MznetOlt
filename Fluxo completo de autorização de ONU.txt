@@ -1,0 +1,108 @@
+Fluxo completo de autorização de ONU
+1️⃣ Usuário autoriza ONU na interface
+
+Usuário clica
+
+Autorizar ONU
+
+Payload enviado ao backend
+
+onu_id
+preset_id (opcional)
+
+Se preset_id não vier → usar preset default.
+
+2️⃣ Feature Layer
+
+Feature
+
+featuresauthorizationauthorize-onu
+
+Responsabilidade
+
+validar entrada
+
+buscar ONU
+
+buscar preset
+
+montar comando
+
+chamar command layer
+
+registrar resultado
+
+Feature não fala com driver.
+
+3️⃣ Command Layer
+
+Responsável por
+
+executar operação de rede
+
+Exemplo
+
+commandsnetworkauthorize-onu-command
+
+Essa camada
+
+recebe ONU + preset
+
+monta operação
+
+chama driver correto da OLT
+
+retorna resultado
+
+4️⃣ Driver Layer
+
+Responsável por falar com a OLT.
+
+Exemplo
+
+driversolthuawei
+driversoltzte
+driversoltvsol
+
+Driver executa
+
+authorizeOnu()
+5️⃣ Banco registra tentativa
+
+Depois da execução
+
+Banco guarda
+
+authorization_events
+
+exemplo
+
+onu_id
+preset_id
+requested_at
+executed_at
+result
+driver_response
+Estrutura final de pastas
+
+Quando terminar, o projeto terá
+
+backendsrc
+
+features
+  authorization
+    authorize-onu
+    list-authorization-presets
+    get-default-authorization-preset
+
+commands
+  network
+    authorize-onu-command
+
+drivers
+  olt
+    huawei
+    zte
+    vsol
+
+repositories
