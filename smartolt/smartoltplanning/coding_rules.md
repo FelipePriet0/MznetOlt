@@ -198,6 +198,7 @@ src/
 - [ ] Services testáveis (sem dependências framework)
 - [ ] Sem console.log em produção
 - [ ] Nomes claros e previsíveis
+Always follow backend architecture defined in backend/ARCHITECTURE.md
 - [ ] Comentários apenas para contexto, não óbvio
 
 ## Quando Quebrar Estas Regras

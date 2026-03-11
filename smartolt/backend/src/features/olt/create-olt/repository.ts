@@ -1,6 +1,39 @@
 import { supabase } from '@/shared/lib/supabase'
 import type { CreateOltInput, CreateOltOutput } from './types'
 
+export async function existsOltByMgmtIp(mgmt_ip: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('olts')
+    .select('id')
+    .eq('mgmt_ip', mgmt_ip)
+    .maybeSingle()
+
+  if (error) throw error
+  return !!data
+}
+
+export async function existsLocationById(id: number): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('locations')
+    .select('id')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (error) throw error
+  return !!data
+}
+
+export async function existsZoneById(id: number): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('zones')
+    .select('id')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (error) throw error
+  return !!data
+}
+
 export async function createOltRepository(input: CreateOltInput): Promise<CreateOltOutput> {
   const { data, error } = await supabase
     .from('olts')

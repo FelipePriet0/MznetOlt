@@ -1,5 +1,5 @@
-import { supabase } from '@/shared/lib/supabase'
 import type { CreateOltInput } from './types'
+import { existsLocationById, existsOltByMgmtIp, existsZoneById } from './repository'
 
 export class DuplicateMgmtIpError extends Error {
   constructor() {
@@ -23,27 +23,12 @@ export class ZoneNotFoundError extends Error {
 }
 
 export async function validateCreateOlt(input: CreateOltInput): Promise<void> {
-  const { data: existing } = await supabase
-    .from('olts')
-    .select('id')
-    .eq('mgmt_ip', input.mgmt_ip)
-    .maybeSingle()
+  const duplicate = await existsOltByMgmtIp(input.mgmt_ip)
+  if (duplicate) throw new DuplicateMgmtIpError()
 
-  if (existing) throw new DuplicateMgmtIpError()
+  const hasLocation = await existsLocationById(input.location_id)
+  if (!hasLocation) throw new LocationNotFoundError()
 
-  const { data: location } = await supabase
-    .from('locations')
-    .select('id')
-    .eq('id', input.location_id)
-    .maybeSingle()
-
-  if (!location) throw new LocationNotFoundError()
-
-  const { data: zone } = await supabase
-    .from('zones')
-    .select('id')
-    .eq('id', input.zone_id)
-    .maybeSingle()
-
-  if (!zone) throw new ZoneNotFoundError()
+  const hasZone = await existsZoneById(input.zone_id)
+  if (!hasZone) throw new ZoneNotFoundError()
 }
