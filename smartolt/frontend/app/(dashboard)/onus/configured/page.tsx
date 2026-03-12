@@ -499,6 +499,9 @@ export default function OnusConfiguredPage() {
         onRowClick={row => router.push(`/onus/${row.id}`)}
         headerRowClassName="bg-[hsl(var(--secondary))]"
         headerCellClassName="!text-white"
+        containerClassName="relative w-full overflow-auto border-0 rounded-none"
+        bodyClassName="bg-transparent [&_td:first-child]:rounded-l-lg [&_td:last-child]:rounded-r-lg divide-y-0"
+        rowClassName="odd:bg-muted/50 odd:hover:bg-muted/50 hover:bg-transparent border-none"
       />
     </div>
   )

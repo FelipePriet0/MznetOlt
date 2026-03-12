@@ -106,3 +106,12 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+    /* ── Sidebar Tokens ───────────────────────────────── */
+    --sidebar-background: var(--brand-neutral-100);
+    --sidebar-foreground: var(--brand-neutral-900);
+    --sidebar-primary:    var(--primary);
+    --sidebar-primary-foreground: var(--brand-neutral-100);
+    --sidebar-accent:     var(--brand-neutral-200);
+    --sidebar-accent-foreground: var(--brand-neutral-900);
+    --sidebar-border:     var(--border);
+    --sidebar-ring:       var(--ring);

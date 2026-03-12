@@ -59,6 +59,21 @@ export type OnuListFilters = {
   page_size?:    number
 }
 
+export type OnuStatus = {
+  id: number
+  status: string
+  admin_state: string
+  last_seen_at: string | null
+}
+
+export type OnuSignalHistory = {
+  items: { time: string; rx: number; tx: number | null }[]
+}
+
+export type OnuTrafficHistory = {
+  items: { time: string; upload: number; download: number }[]
+}
+
 export const onuApi = {
   list: (filters: OnuListFilters = {}) => {
     const q = new URLSearchParams()
@@ -76,4 +91,29 @@ export const onuApi = {
 
   detail: (id: number) =>
     apiFetch<OnuDetail>(`/api/onu/${id}`),
+
+  status: (id: number) =>
+    apiFetch<OnuStatus>(`/api/onu/${id}/status`),
+
+  signal: (id: number, limit?: number) => {
+    const qs = limit ? `?limit=${limit}` : ''
+    return apiFetch<OnuSignalHistory>(`/api/onu/${id}/signal${qs}`)
+  },
+
+  traffic: (id: number, limit?: number) => {
+    const qs = limit ? `?limit=${limit}` : ''
+    return apiFetch<OnuTrafficHistory>(`/api/onu/${id}/traffic${qs}`)
+  },
+
+  resync: (id: number) =>
+    apiFetch<{ accepted: true; event_id: number | null }>(`/api/onu/resync`, {
+      method: 'POST',
+      body: JSON.stringify({ id }),
+    }),
+
+  disable: (id: number) =>
+    apiFetch<{ accepted: true; event_id: number | null }>(`/api/onu/disable`, {
+      method: 'POST',
+      body: JSON.stringify({ id }),
+    }),
 }

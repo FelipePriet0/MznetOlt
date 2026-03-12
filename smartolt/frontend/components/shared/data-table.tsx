@@ -25,6 +25,9 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void
   headerRowClassName?: string
   headerCellClassName?: string
+  containerClassName?: string
+  bodyClassName?: string
+  rowClassName?: string
 }
 
 export function DataTable<T>({
@@ -40,13 +43,16 @@ export function DataTable<T>({
   onRowClick,
   headerRowClassName = '',
   headerCellClassName = '',
+  containerClassName = '',
+  bodyClassName = '',
+  rowClassName = '',
 }: DataTableProps<T>) {
   const totalPages = total ? Math.ceil(total / pageSize) : undefined
 
   return (
     <div className="flex flex-col gap-0">
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-border">
+      <div className={cn("overflow-x-auto rounded-xl border border-border", containerClassName)}>
         <table className="w-full text-sm">
           <thead>
             <tr className={cn('border-b bg-muted/50', headerRowClassName)}>
@@ -65,7 +71,7 @@ export function DataTable<T>({
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-border bg-card">
+          <tbody className={cn("divide-y divide-border bg-card", bodyClassName)}>
             {loading ? (
               Array.from({ length: skeletonRows }).map((_, i) => (
                 <TableRowSkeleton key={i} cols={columns.length} />
@@ -85,7 +91,8 @@ export function DataTable<T>({
                   key={i}
                   className={cn(
                     'transition-colors',
-                    onRowClick && 'cursor-pointer hover:bg-muted/40'
+                    onRowClick && 'cursor-pointer hover:bg-muted/40',
+                    rowClassName
                   )}
                   onClick={() => onRowClick?.(row)}
                 >
