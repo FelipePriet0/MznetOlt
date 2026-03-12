@@ -30,8 +30,13 @@ const navItems: NavItem[] = [
     icon: <BarChart3 className="w-5 h-5" />,
   },
   {
-    label: 'ONUs',
-    href: '/onus',
+    label: 'Não configuradas',
+    href: '/onus/unconfigured',
+    icon: <Smartphone className="w-5 h-5" />,
+  },
+  {
+    label: 'Configuradas',
+    href: '/onus/configured',
     icon: <Smartphone className="w-5 h-5" />,
   },
   {
@@ -90,13 +95,13 @@ export function Sidebar() {
       <aside
         className={`${
           isOpen ? 'w-64' : 'w-0'
-        } md:w-64 border-r bg-card transition-all duration-300 overflow-hidden md:overflow-visible`}
+        } md:w-64 border-r transition-all duration-300 overflow-hidden md:overflow-visible bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] border-white`}
       >
         <div className="h-screen flex flex-col">
           {/* Logo/Header */}
-          <div className="p-6 border-b">
+          <div className="p-6 border-b border-white">
             <h1 className="text-xl font-bold tracking-tight">SmartOLT</h1>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-white mt-1">
               Network Management
             </p>
           </div>
@@ -105,7 +110,8 @@ export function Sidebar() {
           <nav className="flex-1 overflow-auto p-4">
             <ul className="space-y-2">
               {navItems.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                const baseHref = item.href.split('?')[0]
+                const isActive = pathname === baseHref || pathname.startsWith(baseHref + '/')
                 return (
                   <li key={item.href}>
                     <Link
@@ -117,7 +123,7 @@ export function Sidebar() {
                         ${
                           isActive
                             ? 'bg-primary text-primary-foreground'
-                            : 'text-foreground hover:bg-muted'
+                            : 'text-white/90 hover:bg-[hsl(var(--secondary))] hover:text-[hsl(var(--secondary-foreground))]'
                         }
                       `}
                     >
@@ -131,16 +137,16 @@ export function Sidebar() {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t space-y-3">
+          <div className="p-4 border-t border-white space-y-3">
             {/* User info */}
             {user && (
               <div className="flex items-center gap-2.5 px-1">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-secondary-foreground text-xs font-bold shrink-0">
                   {user.name?.charAt(0).toUpperCase() ?? 'U'}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-medium truncate">{user.name}</p>
-                  <p className="text-[10px] text-muted-foreground truncate capitalize">{user.role_code}</p>
+                  <p className="text-[10px] text-white/80 truncate capitalize">{user.role_code}</p>
                 </div>
               </div>
             )}
@@ -148,9 +154,9 @@ export function Sidebar() {
             {/* Logout button */}
             <button
               onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+              className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 hover:text-white"
             >
-              <LogOut className="h-4 w-4 shrink-0" />
+              <LogOut className="h-4 w-4 shrink-0 text-white" />
               Sign out
             </button>
 

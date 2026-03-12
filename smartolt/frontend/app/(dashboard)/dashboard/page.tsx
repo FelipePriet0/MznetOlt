@@ -388,7 +388,7 @@ export default function DashboardPage() {
                           ]}
                           icon={Clock}
                           accent="warning"
-                          onClick={() => router.push('/onus?status=unconfigured')}
+                          onClick={() => router.push('/onus/unconfigured')}
                           bg="bg-[#0064C8]"
                           bright
                         />
@@ -400,7 +400,7 @@ export default function DashboardPage() {
                           ]}
                           icon={Wifi}
                           accent="success"
-                          onClick={() => router.push('/onus?status=configured')}
+                          onClick={() => router.push('/onus/configured')}
                           bg="bg-[#00783C]"
                           bright
                         />
@@ -414,7 +414,7 @@ export default function DashboardPage() {
                           ]}
                           icon={WifiOff}
                           accent="destructive"
-                          onClick={() => router.push('/onus?status=offline')}
+                          onClick={() => router.push('/onus/configured?status=offline')}
                           bg="bg-[#4C4B4B]"
                           bright
                         />

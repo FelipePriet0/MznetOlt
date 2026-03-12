@@ -23,6 +23,8 @@ interface DataTableProps<T> {
   total?:     number
   onPageChange?: (page: number) => void
   onRowClick?: (row: T) => void
+  headerRowClassName?: string
+  headerCellClassName?: string
 }
 
 export function DataTable<T>({
@@ -36,6 +38,8 @@ export function DataTable<T>({
   total,
   onPageChange,
   onRowClick,
+  headerRowClassName = '',
+  headerCellClassName = '',
 }: DataTableProps<T>) {
   const totalPages = total ? Math.ceil(total / pageSize) : undefined
 
@@ -45,12 +49,13 @@ export function DataTable<T>({
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/50">
+            <tr className={cn('border-b bg-muted/50', headerRowClassName)}>
               {columns.map(col => (
                 <th
                   key={col.key}
                   className={cn(
                     'px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground',
+                    headerCellClassName,
                     col.className
                   )}
                 >
