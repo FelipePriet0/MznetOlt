@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   BarChart3,
   Wifi,
@@ -12,8 +12,10 @@ import {
   Zap,
   Menu,
   X,
+  LogOut,
 } from 'lucide-react'
 import { useState } from 'react'
+import { useAuth } from '@/hooks/use-auth'
 
 interface NavItem {
   label: string
@@ -60,8 +62,15 @@ const navItems: NavItem[] = [
 ]
 
 export function Sidebar() {
-  const pathname = usePathname()
+  const pathname  = usePathname()
+  const router    = useRouter()
+  const { user, logout } = useAuth()
   const [isOpen, setIsOpen] = useState(true)
+
+  function handleLogout() {
+    logout()
+    router.replace('/login')
+  }
 
   return (
     <>
@@ -122,10 +131,32 @@ export function Sidebar() {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t">
-            <div className="text-xs text-muted-foreground">
-              <p>SmartOLT v0.1.0</p>
-              <p className="mt-1">Under Development</p>
+          <div className="p-4 border-t space-y-3">
+            {/* User info */}
+            {user && (
+              <div className="flex items-center gap-2.5 px-1">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
+                  {user.name?.charAt(0).toUpperCase() ?? 'U'}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium truncate">{user.name}</p>
+                  <p className="text-[10px] text-muted-foreground truncate capitalize">{user.role_code}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Logout button */}
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              Sign out
+            </button>
+
+            {/* Version */}
+            <div className="px-1 text-[10px] text-muted-foreground/60">
+              SmartOLT v0.1.0 · Under Development
             </div>
           </div>
         </div>

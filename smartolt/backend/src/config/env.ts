@@ -9,6 +9,7 @@ const EnvSchema = z.object({
     .pipe(z.number().int().min(1).max(65535)),
   SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(16),
+  JWT_SECRET: z.string().min(32).default('changeme-use-a-strong-secret-in-production-32chars'),
 })
 
 export const env = EnvSchema.parse(process.env)

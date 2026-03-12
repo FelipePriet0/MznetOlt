@@ -1,20 +1,9 @@
-/**
- * SmartOLT Backend Server
- *
- * Main entry point for the API server.
- * Initializes Express/Fastify, database connections, and feature routes.
- */
-
 import { env } from './config/env'
+import { createApiServer } from './api/server'
 
-console.log('[SmartOLT Backend] Starting server...')
-console.log('[SmartOLT Backend] Environment:', env.NODE_ENV)
+const server = createApiServer()
 
-// TODO: Initialize HTTP server (Express/Fastify)
-// TODO: Initialize database connection
-// TODO: Initialize feature routes
-// TODO: Start listening on port
-
-const port = env.PORT
-console.log(`[SmartOLT Backend] Ready to listen on port ${port}`)
-console.log('[SmartOLT Backend] Waiting for implementation...')
+server.listen(env.PORT, () => {
+  console.log(`[SmartOLT] Server running on http://localhost:${env.PORT}`)
+  console.log(`[SmartOLT] Environment: ${env.NODE_ENV}`)
+})
