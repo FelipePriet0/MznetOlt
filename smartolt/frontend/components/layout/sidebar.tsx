@@ -31,32 +31,32 @@ const navItems: NavItem[] = [
   },
   {
     label: 'ONUs',
-    href: '/dashboard/onus',
+    href: '/onus',
     icon: <Smartphone className="w-5 h-5" />,
   },
   {
     label: 'OLTs',
-    href: '/dashboard/olts',
+    href: '/olts',
     icon: <Wifi className="w-5 h-5" />,
   },
   {
     label: 'Authorization',
-    href: '/dashboard/authorization',
+    href: '/authorization',
     icon: <Shield className="w-5 h-5" />,
   },
   {
     label: 'Reports',
-    href: '/dashboard/reports',
+    href: '/reports',
     icon: <FileText className="w-5 h-5" />,
   },
   {
     label: 'Diagnostics',
-    href: '/dashboard/diagnostics',
+    href: '/diagnostics',
     icon: <Zap className="w-5 h-5" />,
   },
   {
     label: 'Settings',
-    href: '/dashboard/settings',
+    href: '/settings',
     icon: <Settings className="w-5 h-5" />,
   },
 ]

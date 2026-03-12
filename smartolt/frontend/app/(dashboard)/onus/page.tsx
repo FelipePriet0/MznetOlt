@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, useCallback } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useApi } from '@/hooks/use-api'
 import { onuApi, type OnuItem, type OnuListFilters } from '@/lib/api/onu'
 import { DataTable, type Column } from '@/components/shared/data-table'
@@ -114,6 +114,7 @@ const columns: Column<OnuItem>[] = [
 /* ── Page ─────────────────────────────────────────────────────── */
 export default function OnusPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const [filters, setFilters] = useState<OnuListFilters>({
     page: 1, page_size: 50,
@@ -126,6 +127,22 @@ export default function OnusPage() {
     [filters]
   )
   const { data, loading, refetch } = useApi(fetcher, [filters])
+
+  // Initialize filters from query string (e.g., status)
+  useEffect(() => {
+    const qpStatus = searchParams.get('status') || undefined
+    const qpSerial = searchParams.get('serial_number') || undefined
+    const qpOlt = searchParams.get('olt_id')
+    setFilters(f => ({
+      ...f,
+      status: qpStatus || f.status,
+      serial_number: qpSerial || f.serial_number,
+      olt_id: qpOlt ? Number(qpOlt) : f.olt_id,
+      page: 1,
+    }))
+    if (qpSerial) setSearchInput(qpSerial)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function applySearch() {
     setFilters(f => ({ ...f, serial_number: searchInput || undefined, page: 1 }))
@@ -240,7 +257,7 @@ export default function OnusPage() {
         pageSize={filters.page_size ?? 50}
         total={data?.total}
         onPageChange={page => setFilters(f => ({ ...f, page }))}
-        onRowClick={row => router.push(`/dashboard/onus/${row.id}`)}
+        onRowClick={row => router.push(`/onus/${row.id}`)}
       />
     </div>
   )
