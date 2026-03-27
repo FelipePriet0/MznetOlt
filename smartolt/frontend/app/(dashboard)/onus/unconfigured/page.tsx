@@ -23,29 +23,30 @@ function GroupedTable({ title, items, onAuthorize }: { title: string; items: Unc
       {items.length === 0 ? (
         <p className="text-xs text-muted-foreground">Nenhuma ONU não configurada encontrada.</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="relative w-full overflow-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-muted/50 text-xs text-muted-foreground">
-                <th className="px-3 py-2 text-left">Tipo PON</th>
-                <th className="px-3 py-2 text-left">Quadro</th>
-                <th className="px-3 py-2 text-left">Porta</th>
-                <th className="px-3 py-2 text-left">Descrição da PON</th>
-                <th className="px-3 py-2 text-left">SN</th>
-                <th className="px-3 py-2 text-left">Tipo</th>
-                <th className="px-3 py-2 text-left">Ação</th>
+              <tr className="bg-[hsl(var(--primary))] text-xs">
+                <th className="px-3 py-2.5 text-left !text-white">Tipo PON</th>
+                <th className="px-3 py-2.5 text-left !text-white">Quadro</th>
+                <th className="px-3 py-2.5 text-left !text-white">Porta</th>
+                <th className="px-3 py-2.5 text-left !text-white">Descrição da PON</th>
+                <th className="px-3 py-2.5 text-left !text-white">SN</th>
+                <th className="px-3 py-2.5 text-left !text-white">Tipo</th>
+                <th className="px-3 py-2.5 text-left !text-white">Ação</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="table-row h-2" aria-hidden="true"></tbody>
+            <tbody className="[&_td:first-child]:rounded-l-lg [&_td:last-child]:rounded-r-lg">
               {items.map((it) => (
-                <tr key={it.id} className="border-b last:border-0">
-                  <td className="px-3 py-2">{it.pon_type ?? '—'}</td>
-                  <td className="px-3 py-2">{it.board_name}</td>
-                  <td className="px-3 py-2">{it.pon_port_name}</td>
-                  <td className="px-3 py-2">{it.pon_port_description ?? '—'}</td>
-                  <td className="px-3 py-2">{it.serial_number}</td>
-                  <td className="px-3 py-2">{(it.onu_vendor || it.onu_model) ? `${it.onu_vendor ?? ''} ${it.onu_model ?? ''}`.trim() : '—'}</td>
-                  <td className="px-3 py-2">
+                <tr key={it.id} className="odd:bg-[hsl(var(--secondary))]/20 odd:hover:bg-[hsl(var(--secondary))]/20 border-none hover:bg-transparent">
+                  <td className="px-3 py-2.5">{it.pon_type ?? '—'}</td>
+                  <td className="px-3 py-2.5">{it.board_name}</td>
+                  <td className="px-3 py-2.5">{it.pon_port_name}</td>
+                  <td className="px-3 py-2.5">{it.pon_port_description ?? '—'}</td>
+                  <td className="px-3 py-2.5">{it.serial_number}</td>
+                  <td className="px-3 py-2.5">{(it.onu_vendor || it.onu_model) ? `${it.onu_vendor ?? ''} ${it.onu_model ?? ''}`.trim() : '—'}</td>
+                  <td className="px-3 py-2.5">
                     <button
                       title="Autoriza a ONU com parâmetros padrão definidos pelo backend"
                       className="text-primary text-sm underline-offset-2 hover:underline"
@@ -57,6 +58,7 @@ function GroupedTable({ title, items, onAuthorize }: { title: string; items: Unc
                 </tr>
               ))}
             </tbody>
+            <tbody className="table-row h-2" aria-hidden="true"></tbody>
           </table>
         </div>
       )}

@@ -110,22 +110,21 @@ function relativeTime(ts: string) {
   return `${d}d ago`
 }
 
+function formatEventAction(type: string, serial?: string | null): string {
+  const s = serial ? serial : 'ONU'
+  switch (type) {
+    case 'onu_authorized': return `ONU ${s} autorizada`
+    case 'onu_online':     return `ONU ${s} online`
+    case 'onu_offline':    return `ONU ${s} offline`
+    default:               return type.replace(/_/g, ' ')
+  }
+}
+
 function EventRow({ event }: { event: DashboardRecentEvent }) {
-  const cfg  = EVENT_ICONS[event.event_type] ?? { icon: Activity, color: 'text-muted-foreground bg-muted' }
-  const Icon = cfg.icon
-  const label = event.event_type.replace(/_/g, ' ')
+  const actionText = formatEventAction(event.event_type, event.onu_serial)
   return (
-    <div className="flex items-center gap-3 py-2.5">
-      <div className={cn('flex h-8 w-8 items-center justify-center rounded-full shrink-0', cfg.color)}>
-        <Icon className="h-3.5 w-3.5" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium capitalize truncate">{label}</p>
-        {event.onu_serial && (
-          <p className="text-xs text-muted-foreground font-mono">{event.onu_serial}</p>
-        )}
-      </div>
-      <span className="text-xs text-muted-foreground whitespace-nowrap">{relativeTime(event.created_at)}</span>
+    <div className="py-2.5">
+      <p className="text-sm font-medium truncate" title={actionText}>{actionText}</p>
     </div>
   )
 }
@@ -154,6 +153,24 @@ export default function DashboardPage() {
   const [nsGran, setNsGran] = useState<'hour'|'day'|'week'|'month'|'year'>('day')
   const netStatus     = useApi(() => dashboardApi.networkStatus({ granularity: nsGran, olt_id: selectedOlt ?? undefined }), [nsGran, selectedOlt])
   // graphs removed: network status and auth-per-day
+
+  // Resolve ONU IDs from serials for deep-linking rows
+  const [serialToOnuId, setSerialToOnuId] = useState<Record<string, number>>({})
+  useEffect(() => {
+    async function resolveIds() {
+      const serials = Array.from(new Set((events.data?.items ?? []).map(e => e.onu_serial).filter(Boolean) as string[]))
+      const missing = serials.filter(s => serialToOnuId[s] === undefined)
+      for (const s of missing) {
+        try {
+          const r = await onuApi.list({ serial_number: s, page_size: 1 }) as any
+          const id = r.items?.[0]?.id
+          if (id) setSerialToOnuId(prev => ({ ...prev, [s]: id }))
+        } catch { /* ignore */ }
+      }
+    }
+    resolveIds()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events.data?.items])
 
   // KPI counters (All or OLT specific)
   const [kpi, setKpi] = useState<Partial<{ waiting: number; online: number; offline: number; low: number }> | null>(null)
@@ -516,38 +533,62 @@ export default function DashboardPage() {
                 <h2 className="text-sm font-semibold">Activity feed</h2>
                 <span className="text-xs text-muted-foreground ml-1">— eventos recentes de ONUs (autorização, online, offline)</span>
               </div>
-              <span className="text-xs text-muted-foreground">{filteredEvents.length} eventos</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-muted-foreground">{filteredEvents.length} eventos</span>
+                <button
+                  type="button"
+                  className="text-xs rounded-md border px-2 py-1 hover:bg-muted"
+                  onClick={() => router.push('/info')}
+                  title="Ver tudo"
+                >
+                  Ver tudo
+                </button>
+              </div>
             </div>
-            <div className="relative w-full overflow-auto px-6">
-              {events.loading ? (
-                <div className="py-4 space-y-2">
-                  {Array.from({ length: 6 }).map((_, i) => <EventRowSkeleton key={i} />)}
-                </div>
-              ) : filteredEvents.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">Nenhum evento recente.</p>
-              ) : (
-                <table className="w-full text-sm">
-                  <thead className="bg-transparent">
-                    <tr className="hover:bg-transparent">
-                      <th className="text-left font-medium text-xs text-muted-foreground py-2.5">Evento</th>
-                      <th className="text-right font-medium text-xs text-muted-foreground py-2.5">Quando</th>
-                    </tr>
-                  </thead>
-                  <tbody className="table-row h-2" aria-hidden="true"></tbody>
-                  <tbody className="[&_td:first-child]:rounded-l-lg [&_td:last-child]:rounded-r-lg">
-                    {filteredEvents.map((ev) => (
-                      <tr key={ev.id} className="odd:bg-muted/50 odd:hover:bg-muted/50 border-none hover:bg-transparent">
-                        <td className="py-2.5">
-                          <EventRow event={ev} />
-                        </td>
-                        <td className="py-2.5 text-right text-xs text-muted-foreground whitespace-nowrap">{relativeTime(ev.created_at)}</td>
+              <div className="relative w-full overflow-auto px-6">
+                {events.loading ? (
+                  <div className="py-4 space-y-2">
+                    {Array.from({ length: 6 }).map((_, i) => <EventRowSkeleton key={i} />)}
+                  </div>
+                ) : filteredEvents.length === 0 ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground">Nenhum evento recente.</p>
+                ) : (
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-[hsl(var(--primary))]">
+                        <th className="text-left font-medium text-xs !text-white py-2.5">Ação</th>
+                        <th className="text-right font-medium text-xs !text-white py-2.5">Data</th>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tbody className="table-row h-2" aria-hidden="true"></tbody>
-                </table>
-              )}
-            </div>
+                    </thead>
+                    <tbody className="table-row h-2" aria-hidden="true"></tbody>
+                    <tbody className="[&_td:first-child]:rounded-l-lg [&_td:last-child]:rounded-r-lg">
+                      {filteredEvents.map((ev) => {
+                        const clickable = !!(ev.onu_serial && serialToOnuId[ev.onu_serial])
+                        const targetId = clickable ? serialToOnuId[ev.onu_serial!] : undefined
+                        return (
+                        <tr
+                          key={ev.id}
+                          className={cn(
+                            'border-none',
+                            'odd:bg-[hsl(var(--secondary))]/20',
+                            clickable ? 'cursor-pointer hover:bg-transparent' : 'cursor-default'
+                          )}
+                          onClick={() => { if (targetId) router.push(`/onus/${targetId}`) }}
+                          title={clickable ? `Abrir ONU ${ev.onu_serial}` : undefined}
+                        >
+                          <td className="py-2.5">
+                            <EventRow event={ev} />
+                          </td>
+                          <td className="py-2.5 text-right text-xs text-muted-foreground whitespace-nowrap">
+                            {new Date(ev.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                        </tr>
+                      )})}
+                    </tbody>
+                    <tbody className="table-row h-2" aria-hidden="true"></tbody>
+                  </table>
+                )}
+              </div>
           </div>
 
           {/* Falhas em portas PON — removido por solicitação */}

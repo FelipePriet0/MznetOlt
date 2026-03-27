@@ -1,13 +1,13 @@
 "use client"
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { onuApi } from '@/lib/api/onu'
 import { useApi } from '@/hooks/use-api'
 import { diagnosticsApi, type TicketItem, type TicketFilters } from '@/lib/api/diagnostics'
-import { oltApi, type OltItem } from '@/lib/api/olt'
 import { DataTable, type Column } from '@/components/shared/data-table'
 import { cn } from '@/lib/utils'
-import { ChevronDown, AlertTriangle, AlertCircle, Info, Zap } from 'lucide-react'
+import { AlertTriangle, AlertCircle, Info, Zap, LayoutGrid } from 'lucide-react'
 
 /* ─── Urgency badge ─────────────────────────────────────────── */
 const URGENCY_LABEL: Record<string, string> = {
@@ -75,72 +75,78 @@ const DETECTOR_LABEL: Record<string, string> = {
   ghost_onu:     'ONU fantasma',
 }
 
-/* ─── FilterCell ──────────────────────────────────────────────── */
-function FilterCell({ label, value, open, onToggle, dropRef, children }: {
-  label: string
-  value: string
-  open: boolean
-  onToggle: () => void
-  dropRef: React.RefObject<HTMLDivElement>
-  children: React.ReactNode
-}) {
-  return (
-    <div ref={dropRef} className="flex items-center gap-1.5">
-      <span className="text-xs font-bold whitespace-nowrap shrink-0">{label}</span>
-      <div className="relative">
-        <button
-          type="button"
-          onClick={onToggle}
-          className={cn(
-            'h-8 min-w-[130px] flex items-center justify-between gap-1 rounded-md border border-input bg-background px-2.5 text-xs transition-colors hover:bg-muted',
-            open && 'border-ring ring-2 ring-ring ring-offset-2 ring-offset-background',
-          )}
-        >
-          <span>{value}</span>
-          <ChevronDown className={cn('h-3 w-3 shrink-0 text-muted-foreground transition-transform', open && 'rotate-180')} />
-        </button>
-        {open && (
-          <div className="absolute left-0 z-30 mt-1 min-w-[160px] rounded-md border border-input bg-popover p-1 shadow-lg">
-            {children}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+/* ─── Urgency filter cards config ────────────────────────────── */
+type UrgencyKey = 'all' | 'critical' | 'high' | 'medium' | 'low'
 
-function Opt({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button className="w-full text-left px-3 py-1.5 text-xs rounded-sm hover:bg-muted" onClick={onClick}>
-      {label}
-    </button>
-  )
-}
+const URGENCY_CHIPS: {
+  key: UrgencyKey
+  label: string
+  Icon: React.ElementType
+  activeBg: string
+  iconActiveBg: string
+  iconColor: string
+  countColor: string
+}[] = [
+  {
+    key: 'critical',
+    label: 'Crítico',
+    Icon: Zap,
+    activeBg:     'bg-red-500/10 dark:bg-red-500/10',
+    iconActiveBg: 'bg-red-500/20',
+    iconColor:    'text-red-500',
+    countColor:   'text-red-600 dark:text-red-400',
+  },
+  {
+    key: 'high',
+    label: 'Alta',
+    Icon: AlertCircle,
+    activeBg:     'bg-orange-500/10 dark:bg-orange-500/10',
+    iconActiveBg: 'bg-orange-500/20',
+    iconColor:    'text-orange-500',
+    countColor:   'text-orange-600 dark:text-orange-400',
+  },
+  {
+    key: 'medium',
+    label: 'Média',
+    Icon: AlertTriangle,
+    activeBg:     'bg-yellow-500/10 dark:bg-yellow-500/10',
+    iconActiveBg: 'bg-yellow-500/20',
+    iconColor:    'text-yellow-500',
+    countColor:   'text-yellow-600 dark:text-yellow-400',
+  },
+  {
+    key: 'low',
+    label: 'Baixa',
+    Icon: Info,
+    activeBg:     'bg-blue-500/10 dark:bg-blue-500/10',
+    iconActiveBg: 'bg-blue-500/20',
+    iconColor:    'text-blue-500',
+    countColor:   'text-blue-600 dark:text-blue-400',
+  },
+]
 
 /* ─── Page ────────────────────────────────────────────────────── */
 export default function TicketsPage() {
   const router = useRouter()
   const [filters, setFilters] = useState<TicketFilters>({ page: 1, page_size: 50 })
+  const [selected, setSelected] = useState<TicketItem | null>(null)
+  const [activeUrgency, setActiveUrgency] = useState<UrgencyKey>('all')
 
-  const [statusOpen,  setStatusOpen]  = useState(false)
-  const [urgencyOpen, setUrgencyOpen] = useState(false)
-  const [oltOpen,     setOltOpen]     = useState(false)
-
-  const statusRef  = useRef<HTMLDivElement>(null)
-  const urgencyRef = useRef<HTMLDivElement>(null)
-  const oltRef     = useRef<HTMLDivElement>(null)
-
-  const olts = useApi(() => oltApi.list({ page_size: 1000 }), [])
   const fetcher = useCallback(() => diagnosticsApi.listTickets(filters), [filters])
   const { data, loading } = useApi(fetcher, [filters])
 
-  const oltOptions: OltItem[] = olts.data?.items ?? []
-
-  const statusLabel = filters.status ? (STATUS_LABEL[filters.status] ?? filters.status) : 'Qualquer'
-  const urgencyLabel = filters.urgency ? (URGENCY_LABEL[filters.urgency] ?? filters.urgency) : 'Qualquer'
-  const oltLabel = filters.olt_id
-    ? (oltOptions.find(o => o.id === filters.olt_id)?.name ?? `OLT #${filters.olt_id}`)
-    : 'Qualquer'
+  const counts = useApi(async () => {
+    const urgencies: ('critical' | 'high' | 'medium' | 'low')[] = ['critical', 'high', 'medium', 'low']
+    const results = await Promise.all(
+      urgencies.map(u => diagnosticsApi.listTickets({ urgency: u, page: 1, page_size: 1 }))
+    )
+    return {
+      critical: results[0]?.total ?? 0,
+      high:     results[1]?.total ?? 0,
+      medium:   results[2]?.total ?? 0,
+      low:      results[3]?.total ?? 0,
+    }
+  }, [])
 
   const columns: Column<TicketItem>[] = [
     {
@@ -187,59 +193,169 @@ export default function TicketsPage() {
     },
   ]
 
+  const countsData = counts.data
+
   return (
-    <div className="flex flex-col gap-4 p-4 sm:p-6 lg:p-8">
+    <div className="flex flex-col gap-3 p-4 sm:p-6 lg:p-8">
+      <div className="rounded-lg border overflow-hidden">
+        {/* ── Filter cards bar — colada no topo da tabela ── */}
+        <div className="flex divide-x border-b bg-card">
+          {/* Card "Todos" */}
+          <button
+            onClick={() => {
+              setActiveUrgency('all')
+              setFilters(f => ({ ...f, page: 1, urgency: undefined }))
+            }}
+            className={cn(
+              'flex items-center gap-3 px-5 py-4 flex-1 transition-colors text-left',
+              activeUrgency === 'all' ? 'bg-foreground/5' : 'hover:bg-muted/50',
+            )}
+          >
+            <div className={cn(
+              'rounded-md p-2 shrink-0',
+              activeUrgency === 'all' ? 'bg-foreground/15' : 'bg-muted',
+            )}>
+              <LayoutGrid className="h-4 w-4 text-foreground" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold tabular-nums leading-none">{data?.total ?? 0}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Todos</p>
+            </div>
+          </button>
 
-      {/* Filtros */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <FilterCell label="Status" value={statusLabel} open={statusOpen} onToggle={() => setStatusOpen(v => !v)} dropRef={statusRef}>
-          <Opt label="Qualquer" onClick={() => { setFilters(f => ({ ...f, status: undefined, page: 1 })); setStatusOpen(false) }} />
-          <Opt label="Aberto"         onClick={() => { setFilters(f => ({ ...f, status: 'open',           page: 1 })); setStatusOpen(false) }} />
-          <Opt label="Em campo"       onClick={() => { setFilters(f => ({ ...f, status: 'in_field',       page: 1 })); setStatusOpen(false) }} />
-          <Opt label="Resolvido"      onClick={() => { setFilters(f => ({ ...f, status: 'resolved',       page: 1 })); setStatusOpen(false) }} />
-          <Opt label="Fechado"        onClick={() => { setFilters(f => ({ ...f, status: 'closed',         page: 1 })); setStatusOpen(false) }} />
-          <Opt label="Falso positivo" onClick={() => { setFilters(f => ({ ...f, status: 'false_positive', page: 1 })); setStatusOpen(false) }} />
-        </FilterCell>
+          {URGENCY_CHIPS.map(chip => {
+            const count = countsData?.[chip.key as keyof typeof countsData] ?? 0
+            const isActive = activeUrgency === chip.key
+            const { Icon } = chip
+            return (
+              <button
+                key={chip.key}
+                onClick={() => {
+                  setActiveUrgency(chip.key)
+                  setFilters(f => ({ ...f, page: 1, urgency: chip.key as any }))
+                }}
+                className={cn(
+                  'flex items-center gap-3 px-5 py-4 flex-1 transition-colors text-left',
+                  isActive ? chip.activeBg : 'hover:bg-muted/50',
+                )}
+              >
+                <div className={cn(
+                  'rounded-md p-2 shrink-0',
+                  isActive ? chip.iconActiveBg : 'bg-muted',
+                )}>
+                  <Icon className={cn('h-4 w-4', isActive ? chip.iconColor : 'text-muted-foreground')} />
+                </div>
+                <div>
+                  <p className={cn(
+                    'text-2xl font-bold tabular-nums leading-none',
+                    isActive ? chip.countColor : 'text-foreground',
+                  )}>
+                    {count}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{chip.label}</p>
+                </div>
+              </button>
+            )
+          })}
+        </div>
 
-        <FilterCell label="Urgência" value={urgencyLabel} open={urgencyOpen} onToggle={() => setUrgencyOpen(v => !v)} dropRef={urgencyRef}>
-          <Opt label="Qualquer" onClick={() => { setFilters(f => ({ ...f, urgency: undefined,  page: 1 })); setUrgencyOpen(false) }} />
-          <Opt label="Crítico"  onClick={() => { setFilters(f => ({ ...f, urgency: 'critical', page: 1 })); setUrgencyOpen(false) }} />
-          <Opt label="Alta"     onClick={() => { setFilters(f => ({ ...f, urgency: 'high',     page: 1 })); setUrgencyOpen(false) }} />
-          <Opt label="Média"    onClick={() => { setFilters(f => ({ ...f, urgency: 'medium',   page: 1 })); setUrgencyOpen(false) }} />
-          <Opt label="Baixa"    onClick={() => { setFilters(f => ({ ...f, urgency: 'low',      page: 1 })); setUrgencyOpen(false) }} />
-        </FilterCell>
-
-        <FilterCell label="OLT" value={oltLabel} open={oltOpen} onToggle={() => setOltOpen(v => !v)} dropRef={oltRef}>
-          <Opt label="Qualquer" onClick={() => { setFilters(f => ({ ...f, olt_id: undefined, page: 1 })); setOltOpen(false) }} />
-          {oltOptions.map(o => (
-            <Opt key={o.id} label={o.name} onClick={() => { setFilters(f => ({ ...f, olt_id: o.id, page: 1 })); setOltOpen(false) }} />
-          ))}
-        </FilterCell>
-
-        {data && (
-          <span className="ml-auto text-xs text-muted-foreground">
-            {data.total} ticket{data.total !== 1 ? 's' : ''}
-          </span>
-        )}
+        {/* ── Tabela ── */}
+        <DataTable
+          columns={columns}
+          data={data?.items ?? []}
+          loading={loading}
+          skeletonRows={10}
+          emptyText="Nenhum ticket encontrado."
+          page={filters.page ?? 1}
+          pageSize={filters.page_size ?? 50}
+          total={data?.total}
+          onPageChange={page => setFilters(f => ({ ...f, page }))}
+          onRowClick={row => setSelected(row)}
+          headerRowClassName="bg-transparent"
+          headerCellClassName="!text-[hsl(var(--primary))] font-bold"
+          containerClassName="relative w-full overflow-auto border-0 rounded-none"
+          bodyClassName="bg-transparent divide-y-0"
+          rowClassName="odd:bg-[hsl(var(--secondary))]/20 odd:hover:bg-[hsl(var(--secondary))]/20 hover:bg-transparent border-none cursor-pointer"
+        />
       </div>
 
-      <DataTable
-        columns={columns}
-        data={data?.items ?? []}
-        loading={loading}
-        skeletonRows={10}
-        emptyText="Nenhum ticket encontrado."
-        page={filters.page ?? 1}
-        pageSize={filters.page_size ?? 50}
-        total={data?.total}
-        onPageChange={page => setFilters(f => ({ ...f, page }))}
-        onRowClick={row => router.push(`/onus/${row.onu_id}`)}
-        headerRowClassName="bg-[hsl(var(--primary))]"
-        headerCellClassName="!text-white"
-        containerClassName="relative w-full overflow-auto border-0 rounded-none"
-        bodyClassName="bg-transparent divide-y-0"
-        rowClassName="odd:bg-[hsl(var(--secondary))]/20 odd:hover:bg-[hsl(var(--secondary))]/20 hover:bg-transparent border-none cursor-pointer"
-      />
+      {/* Side panel ticket details */}
+      {selected && (
+        <TicketSidePanel ticket={selected} onClose={() => setSelected(null)} onViewOnu={() => router.push(`/onus/${selected.onu_id}`)} />
+      )}
     </div>
+  )
+}
+
+/* ─── Diagnosis renderer ─────────────────────────────────────── */
+function DiagnosisBlock({ text }: { text: string }) {
+  const lines = text.split('\n')
+  return (
+    <div className="space-y-3">
+      {lines.map((line, i) => {
+        const heading = line.match(/^\*\*(.+)\*\*$/)
+        if (heading) {
+          return <h4 key={i} className="text-sm font-bold text-foreground mt-4 first:mt-0">{heading[1]}</h4>
+        }
+        const bullet = line.match(/^[•\-]\s+(.+)/)
+        if (bullet) {
+          return (
+            <div key={i} className="flex gap-2 text-sm text-foreground/90">
+              <span className="mt-0.5 shrink-0 text-muted-foreground">•</span>
+              <span className="leading-relaxed">{bullet[1]}</span>
+            </div>
+          )
+        }
+        if (line.trim() === '') return null
+        return <p key={i} className="text-sm text-foreground/90 leading-relaxed">{line}</p>
+      })}
+    </div>
+  )
+}
+
+/* ─── Side Panel ─────────────────────────────────────────────── */
+function TicketSidePanel({ ticket, onClose, onViewOnu }: { ticket: TicketItem; onClose: () => void; onViewOnu: () => void }) {
+  const { data: onuDetail } = useApi(() => onuApi.detail(ticket.onu_id), [ticket.onu_id])
+const detectorLabel = DETECTOR_LABEL[ticket.detector_type] ?? ticket.detector_type
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
+      <aside className="fixed top-0 right-0 h-screen w-full max-w-md z-50 bg-card border-l shadow-2xl flex flex-col">
+        <div className="flex items-center justify-between border-b px-4 py-3">
+          <h2 className="text-sm font-semibold">Ticket</h2>
+          <div className="flex items-center gap-2">
+            <button onClick={onViewOnu} className="text-xs rounded-md border px-2.5 py-1 font-medium bg-foreground text-background hover:bg-foreground/90">Ver ONU →</button>
+            <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">✕</button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-auto p-4 space-y-4">
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">Nome do cliente</p>
+            <p className="text-sm font-medium">{onuDetail?.name || '—'}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">ONU</p>
+              <p className="font-mono text-sm">{ticket.onu_serial}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Urgência</p>
+              <UrgencyBadge urgency={ticket.urgency} />
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">Problema</p>
+            <p className="text-sm font-medium">{detectorLabel}</p>
+          </div>
+          <div>
+            {ticket.diagnosis ? (
+              <DiagnosisBlock text={ticket.diagnosis} />
+            ) : (
+              <p className="text-sm text-muted-foreground italic">Gerando…</p>
+            )}
+          </div>
+        </div>
+      </aside>
+    </>
   )
 }

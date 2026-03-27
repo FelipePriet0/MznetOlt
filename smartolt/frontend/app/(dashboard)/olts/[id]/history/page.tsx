@@ -34,22 +34,23 @@ export default function OltHistoryPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border bg-card overflow-hidden">
+      <div className="relative w-full overflow-auto rounded-xl border bg-card">
         <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-muted/40 text-xs text-muted-foreground">
-              <th className="px-4 py-3 text-left font-medium">Ação</th>
-              <th className="px-4 py-3 text-left font-medium w-56">Usuário</th>
-              <th className="px-4 py-3 text-left font-medium w-44">Data</th>
+          <thead className="bg-transparent">
+            <tr className="hover:bg-transparent text-xs text-muted-foreground">
+              <th className="px-4 py-2.5 text-left font-medium">Ação</th>
+              <th className="px-4 py-2.5 text-left font-medium w-56">Usuário</th>
+              <th className="px-4 py-2.5 text-left font-medium w-44">Data</th>
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody className="table-row h-2" aria-hidden="true"></tbody>
+          <tbody className="[&_td:first-child]:rounded-l-lg [&_td:last-child]:rounded-r-lg">
             {loading ? (
               Array.from({ length: 8 }).map((_, i) => (
-                <tr key={i}>
-                  <td className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>
-                  <td className="px-4 py-3"><Skeleton className="h-4 w-40" /></td>
-                  <td className="px-4 py-3"><Skeleton className="h-4 w-32" /></td>
+                <tr key={i} className="odd:bg-muted/50 odd:hover:bg-muted/50 border-none hover:bg-transparent">
+                  <td className="px-4 py-2.5"><Skeleton className="h-4 w-full" /></td>
+                  <td className="px-4 py-2.5"><Skeleton className="h-4 w-40" /></td>
+                  <td className="px-4 py-2.5"><Skeleton className="h-4 w-32" /></td>
                 </tr>
               ))
             ) : !data?.items.length ? (
@@ -63,10 +64,10 @@ export default function OltHistoryPage() {
               </tr>
             ) : (
               data.items.map(item => (
-                <tr key={item.id} className="hover:bg-muted/30">
-                  <td className="px-4 py-3">{item.action}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{item.user_email ?? '—'}</td>
-                  <td className="px-4 py-3 text-muted-foreground tabular-nums">
+                <tr key={item.id} className="odd:bg-muted/50 odd:hover:bg-muted/50 border-none hover:bg-transparent">
+                  <td className="px-4 py-2.5">{item.action}</td>
+                  <td className="px-4 py-2.5 text-muted-foreground">{item.user_email ?? '—'}</td>
+                  <td className="px-4 py-2.5 text-muted-foreground tabular-nums">
                     {new Date(item.created_at).toLocaleString('pt-BR', {
                       day: '2-digit', month: '2-digit', year: 'numeric',
                       hour: '2-digit', minute: '2-digit',
@@ -76,6 +77,7 @@ export default function OltHistoryPage() {
               ))
             )}
           </tbody>
+          <tbody className="table-row h-2" aria-hidden="true"></tbody>
         </table>
 
         {data && data.total > 0 && (

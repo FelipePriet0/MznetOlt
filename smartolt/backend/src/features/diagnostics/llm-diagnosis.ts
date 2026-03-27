@@ -22,7 +22,7 @@ export async function generateDiagnosis(
   const factsText = JSON.stringify(facts, null, 2)
 
   const prompt = `Você é um técnico sênior de redes GPON de uma empresa de telecomunicações.
-Com base nos dados abaixo, escreva um diagnóstico claro e objetivo para o técnico de campo em português brasileiro.
+Com base nos dados abaixo, escreva um diagnóstico objetivo para o técnico de campo em português brasileiro.
 
 CONTEXTO DO PROBLEMA:
 ${context}
@@ -30,12 +30,24 @@ ${context}
 DADOS COLETADOS:
 ${factsText}
 
-INSTRUÇÕES:
-- Máximo 3 parágrafos curtos
-- Use linguagem técnica mas acessível
-- Explique o que está acontecendo, qual a provável causa e o que o técnico deve verificar
-- Não use bullet points, escreva em prosa
-- Não repita os números brutos já visíveis nos dados — interprete-os`
+FORMATO OBRIGATÓRIO (use exatamente esta estrutura, em no máximo 2 blocos):
+
+**Diagnóstico**
+• [o que está acontecendo com a ONU, interpretando os dados]
+
+**Prováveis Causas**
+• [causa mais provável]
+• [causa alternativa se houver]
+
+**Como Resolver**
+• [ação principal]
+• [ação complementar se necessário]
+
+REGRAS:
+- Use bullets (•) em todos os itens, nunca prosa corrida
+- Seja direto — sem introduções, sem conclusões
+- Não repita os números brutos dos dados — interprete-os
+- Máximo 2 itens por seção`
 
   try {
     const response = await client.chat.completions.create({

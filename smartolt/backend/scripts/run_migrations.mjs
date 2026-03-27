@@ -6,9 +6,8 @@ const REF = 'cnyglvhnnyssnviljptr'
 const BASE = 'C:/Users/studi/Downloads/mznetolt/smartolt/infrastructure/database/migrations'
 
 const migrations = [
-  '0019_create_diagnostic_rules.sql',
-  '0020_create_diagnostic_tickets.sql',
-  '0021_create_ticket_events.sql',
+  '0013_add_pon_ports_description.sql',
+  '0029_add_pon_ports_config_fields.sql',
 ]
 
 for (const file of migrations) {

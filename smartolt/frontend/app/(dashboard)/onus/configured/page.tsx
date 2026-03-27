@@ -138,15 +138,39 @@ export default function OnusConfiguredPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const [filters,     setFilters]     = useState<OnuListFilters>({ page: 1, page_size: 50, status_in: ['online','offline'] })
-  const [statusSet,   setStatusSet]   = useState<Set<StatusIconKey>>(new Set())
+  // Inicializa filtros direto do URL para que o primeiro fetch já seja correto
+  const [filters, setFilters] = useState<OnuListFilters>(() => {
+    const s = searchParams.get('status')
+    const qPort = searchParams.get('pon_port_id')
+    const qOlt  = searchParams.get('olt_id')
+    const portId = qPort ? Number(qPort) : undefined
+    const oltId  = qOlt  ? Number(qOlt)  : undefined
+    return {
+      page: 1,
+      page_size: 50,
+      status_in: (s === 'online' || s === 'offline') ? [s] : ['online', 'offline'],
+      pon_port_ids: portId ? [portId] : undefined,
+      olt_ids:      oltId  ? [oltId]  : undefined,
+    }
+  })
+
+  const [statusSet,   setStatusSet]   = useState<Set<StatusIconKey>>(() => {
+    const s = searchParams.get('status')
+    return (s === 'online' || s === 'offline') ? new Set([s as StatusIconKey]) : new Set()
+  })
   const [signalSet,   setSignalSet]   = useState<Set<'good' | 'warning' | 'critical'>>(new Set())
   const [searchInput, setSearchInput] = useState('')
 
   // Multi-select Sets para filtros de topologia
-  const [oltSet,     setOltSet]     = useState<Set<number>>(new Set())
+  const [oltSet,     setOltSet]     = useState<Set<number>>(() => {
+    const id = Number(searchParams.get('olt_id'))
+    return id ? new Set([id]) : new Set()
+  })
   const [boardSet,   setBoardSet]   = useState<Set<number>>(new Set())
-  const [portSet,    setPortSet]    = useState<Set<number>>(new Set())
+  const [portSet,    setPortSet]    = useState<Set<number>>(() => {
+    const id = Number(searchParams.get('pon_port_id'))
+    return id ? new Set([id]) : new Set()
+  })
   const [zoneSet,    setZoneSet]    = useState<Set<number>>(new Set())
 
   const [oltOpen,     setOltOpen]     = useState(false)
@@ -243,6 +267,15 @@ export default function OnusConfiguredPage() {
       if (!isNaN(id)) {
         setOltSet(new Set([id]))
         setFilters(f => ({ ...f, olt_ids: [id], page: 1 }))
+      }
+    }
+
+    const qPort = searchParams.get('pon_port_id')
+    if (qPort) {
+      const id = Number(qPort)
+      if (!isNaN(id)) {
+        setPortSet(new Set([id]))
+        setFilters(f => ({ ...f, pon_port_ids: [id], page: 1 }))
       }
     }
   }, [searchParams])

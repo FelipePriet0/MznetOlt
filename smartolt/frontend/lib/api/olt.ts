@@ -33,7 +33,19 @@ export type BoardItem = {
   created_at:     string
   updated_at:     string
 }
-export type PonPortItem = { id: number; name: string; pon_index: number }
+export type PonPortItem = {
+  id: number
+  name: string
+  pon_index: number
+  board_id?: number
+  admin_state: string
+  description: string | null
+  min_range_meters: number
+  max_range_meters: number
+  onu_total: number
+  onu_online: number
+  avg_rx_dbm: number | null
+}
 export type BoardsResponse = { items: BoardItem[] }
 export type PonPortsResponse = { items: PonPortItem[] }
 
@@ -190,6 +202,15 @@ export const oltApi = {
       method: 'PATCH',
       body: JSON.stringify(patch),
     }),
+
+  updatePonPort: (portId: number, patch: { admin_state?: string; description?: string; min_range_meters?: number; max_range_meters?: number }) =>
+    apiFetch<{ updated: boolean }>(`/api/pon-ports/${portId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
+
+  restartPonPortOnus: (portId: number) =>
+    apiFetch<{ restarted: boolean }>(`/api/pon-ports/${portId}/restart-onus`, { method: 'POST' }),
 }
 
 export type OltHistoryItem = {

@@ -15,6 +15,8 @@ import { triggerOltBackupHandler } from './trigger-olt-backup.handler'
 import { listUplinkPortsHandler } from './list-uplink-ports.handler'
 import { updateUplinkPortHandler } from './update-uplink-port.handler'
 import { deleteOltBackupHandler } from './delete-olt-backup.handler'
+import { updatePonPortHandler } from './update-pon-port.handler'
+import { restartPonPortOnusHandler } from './restart-pon-port-onus.handler'
 
 export const oltRoutes: RouteDefinition[] = [
   { method: 'GET',  path: '/api/olt',                  handler: listOltsHandler },
@@ -33,4 +35,6 @@ export const oltRoutes: RouteDefinition[] = [
   { method: 'GET',  path: '/api/boards',               handler: listAllBoardsHandler },
   { method: 'GET',  path: '/api/boards/:id/pon-ports', handler: listPonPortsByBoardHandler },
   { method: 'GET',  path: '/api/pon-ports',            handler: listAllPonPortsHandler },
+  { method: 'PATCH', path: '/api/pon-ports/:portId',                    handler: updatePonPortHandler },
+  { method: 'POST',  path: '/api/pon-ports/:portId/restart-onus',       handler: restartPonPortOnusHandler },
 ]

@@ -56,16 +56,44 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "To do.md",
+                "file": "UI/Tabelas.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "To do"
+              "title": "Tabelas"
+            }
+          },
+          {
+            "id": "01c28ca4063aaf3d",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Como a Inteligência Funciona.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Como a Inteligência Funciona"
+            }
+          },
+          {
+            "id": "89a8b2794a51231c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Prompt do Diagnóstico.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Prompt do Diagnóstico"
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 5
       },
       {
         "id": "4ffe0dfe316d41dc",
@@ -248,24 +276,27 @@
       "bases:Criar nova base": false
     }
   },
-  "active": "bbfa89555f534dac",
+  "active": "89a8b2794a51231c",
   "lastOpenFiles": [
-    "UI/Graph autorizações da ONU por dia.md",
-    "UI/Tabelas.md",
-    "UI",
+    "integracao-cli-olt-pendencias.md",
+    "Integracao-WPP-Agendamento.md",
+    "MznetOLT diagram.md",
     "Forma de Ativação.md",
+    "Como a Inteligência Funciona.md",
+    "A tractian dos Provedores.md",
+    "UI/Tabelas.md",
     "To do.md",
+    "SmartoltLikeApp.md",
+    "Ui dos Tickets.md",
+    "Prompt do Diagnóstico.md",
+    "Roadmap das Features/Olts/Portas PON.md",
+    "UI/Graph autorizações da ONU por dia.md",
+    "UI",
     "Plano OLT Feature - Progresso.md",
     "Onde paramos.md",
     "O que NÃO usamos.md",
-    "integracao-cli-olt-pendencias.md",
-    "SmartoltLikeApp.md",
     "Plano para erros do advisorsupabase.md",
     "Pasted image 20260326164004.png",
-    "MznetOLT diagram.md",
-    "Integracao-WPP-Agendamento.md",
-    "Como a Inteligência Funciona.md",
-    "A tractian dos Provedores.md",
     "Roadmap das Features/Gerenciamento de Zonas (Derivado de Settings).md",
     "Roadmap das Features/Detalhe da ONU.md",
     "Roadmap das Features/Olts/Uplink.md",
@@ -275,9 +306,6 @@
     "Roadmap das Features/Olts/Detalhes da OLT (Derivado de OLT).md",
     "Roadmap das Features/Olts/Adicionar OLT (Derivado de OLTs).md",
     "Roadmap das Features/Settings.md",
-    "Roadmap das Features/Traffic.md",
-    "Roadmap das Features/System.md",
-    "Roadmap das Features/Signal.md",
     "Roadmap das Features/Olts",
     "Pasted image 20260325091233.png",
     "Roadmap das Features"

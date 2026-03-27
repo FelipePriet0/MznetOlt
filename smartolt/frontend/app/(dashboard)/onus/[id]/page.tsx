@@ -568,24 +568,26 @@ export default function OnuDetailPage() {
       {/* Perfis de velocidade */}
       <div className="rounded-xl border bg-card p-4 shadow-sm">
         <h2 className="text-sm font-semibold mb-2">Perfis de velocidade</h2>
-        <div className="overflow-x-auto">
+        <div className="relative w-full overflow-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-muted/50 text-xs text-muted-foreground">
-                <th className="px-3 py-2 text-left">ID da porta de serviço</th>
-                <th className="px-3 py-2 text-left">VLAN do Usuário</th>
-                <th className="px-3 py-2 text-left">Download</th>
-                <th className="px-3 py-2 text-left">Upload</th>
+              <tr className="bg-[hsl(var(--primary))] text-xs">
+                <th className="px-3 py-2.5 text-left !text-white">ID da porta de serviço</th>
+                <th className="px-3 py-2.5 text-left !text-white">VLAN do Usuário</th>
+                <th className="px-3 py-2.5 text-left !text-white">Download</th>
+                <th className="px-3 py-2.5 text-left !text-white">Upload</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td className="px-3 py-2">{detail.data?.service_port_id ?? '—'}</td>
-                <td className="px-3 py-2">{detail.data?.vlan_id ?? '—'}</td>
-                <td className="px-3 py-2">{detail.data?.download_profile ?? '—'}</td>
-                <td className="px-3 py-2">{detail.data?.upload_profile ?? '—'}</td>
+            <tbody className="table-row h-2" aria-hidden="true"></tbody>
+            <tbody className="[&_td:first-child]:rounded-l-lg [&_td:last-child]:rounded-r-lg">
+              <tr className="odd:bg-[hsl(var(--secondary))]/20 odd:hover:bg-[hsl(var(--secondary))]/20 border-none hover:bg-transparent">
+                <td className="px-3 py-2.5">{detail.data?.service_port_id ?? '—'}</td>
+                <td className="px-3 py-2.5">{detail.data?.vlan_id ?? '—'}</td>
+                <td className="px-3 py-2.5">{detail.data?.download_profile ?? '—'}</td>
+                <td className="px-3 py-2.5">{detail.data?.upload_profile ?? '—'}</td>
               </tr>
             </tbody>
+            <tbody className="table-row h-2" aria-hidden="true"></tbody>
           </table>
         </div>
       </div>
@@ -593,29 +595,31 @@ export default function OnuDetailPage() {
       {/* Portas Ethernet */}
       <div className="rounded-xl border bg-card p-4 shadow-sm">
         <h2 className="text-sm font-semibold mb-2">Portas Ethernet</h2>
-        <div className="overflow-x-auto">
+        <div className="relative w-full overflow-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-muted/50 text-xs text-muted-foreground">
-                <th className="px-3 py-2 text-left">Porta</th>
-                <th className="px-3 py-2 text-left">Estado administrativo</th>
-                <th className="px-3 py-2 text-left">Modo</th>
-                <th className="px-3 py-2 text-left">DHCP</th>
+              <tr className="bg-[hsl(var(--primary))] text-xs">
+                <th className="px-3 py-2.5 text-left !text-white">Porta</th>
+                <th className="px-3 py-2.5 text-left !text-white">Estado administrativo</th>
+                <th className="px-3 py-2.5 text-left !text-white">Modo</th>
+                <th className="px-3 py-2.5 text-left !text-white">DHCP</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="table-row h-2" aria-hidden="true"></tbody>
+            <tbody className="[&_td:first-child]:rounded-l-lg [&_td:last-child]:rounded-r-lg">
               {(ethPorts.data?.items ?? []).map(p => (
-                <tr key={p.id} className="border-b last:border-0">
-                  <td className="px-3 py-2">{p.port_name}</td>
-                  <td className="px-3 py-2">{p.admin_state}</td>
-                  <td className="px-3 py-2">{p.mode}{p.vlan_id ? ` (VLAN ${p.vlan_id})` : ''}</td>
-                  <td className="px-3 py-2">{p.dhcp_mode ?? 'Sem controle'}</td>
+                <tr key={p.id} className="odd:bg-[hsl(var(--secondary))]/20 odd:hover:bg-[hsl(var(--secondary))]/20 border-none hover:bg-transparent">
+                  <td className="px-3 py-2.5">{p.port_name}</td>
+                  <td className="px-3 py-2.5">{p.admin_state}</td>
+                  <td className="px-3 py-2.5">{p.mode}{p.vlan_id ? ` (VLAN ${p.vlan_id})` : ''}</td>
+                  <td className="px-3 py-2.5">{p.dhcp_mode ?? 'Sem controle'}</td>
                 </tr>
               ))}
               {((ethPorts.data?.items ?? []).length === 0) && (
-                <tr><td className="px-3 py-4 text-xs text-muted-foreground" colSpan={4}>Nenhuma porta cadastrada.</td></tr>
+                <tr className="odd:bg-[hsl(var(--secondary))]/20 odd:hover:bg-[hsl(var(--secondary))]/20 border-none hover:bg-transparent"><td className="px-3 py-4 text-xs text-muted-foreground" colSpan={4}>Nenhuma porta cadastrada.</td></tr>
               )}
             </tbody>
+            <tbody className="table-row h-2" aria-hidden="true"></tbody>
           </table>
         </div>
       </div>

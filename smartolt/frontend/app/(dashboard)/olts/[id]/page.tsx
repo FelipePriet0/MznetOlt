@@ -11,7 +11,7 @@ import { cn }       from '@/lib/utils'
 import {
   ArrowLeft, AlertTriangle, Wifi,
   Pencil, History, HardDrive,
-  Lock, Eye, EyeOff, Plus, X,
+  Lock, Eye, EyeOff, Plus, X, RotateCcw, Settings2,
 } from 'lucide-react'
 import Image from 'next/image'
 
@@ -85,6 +85,15 @@ export default function OltDetailPage() {
   // Uplink
   const [showUplinkInfo, setShowUplinkInfo] = useState(true)
 
+  // PON port config modal
+  const [ponConfigPort,    setPonConfigPort]    = useState<PonPortItem | null>(null)
+  const [ponForm,          setPonForm]          = useState<{ admin_state: string; description: string; min_range_meters: number; max_range_meters: number }>({ admin_state: 'enabled', description: '', min_range_meters: 0, max_range_meters: 20000 })
+  const [ponSaving,        setPonSaving]        = useState(false)
+  const [restartPort,      setRestartPort]      = useState<PonPortItem | null>(null)
+  const [restarting,       setRestarting]       = useState(false)
+  const [restartBoard,     setRestartBoard]     = useState<BoardItem | null>(null)
+  const [restartingBoard,  setRestartingBoard]  = useState(false)
+
   // Uplink config modal
   const [configPort,    setConfigPort]    = useState<UplinkPortItem | null>(null)
   const [uplinkForm,    setUplinkForm]    = useState<Partial<UplinkPortItem>>({})
@@ -109,6 +118,44 @@ export default function OltDetailPage() {
   const { data: vlans,    loading: loadingVlans,  refetch: refetchVlans  } = useApi(vlansFetcher,   [])
   const { data: uplinks,  loading: loadingUplink, refetch: refetchUplink } = useApi(uplinkFetcher,  [oltId])
   const { data: allPons                                                   } = useApi(allPonFetcher,  [])
+
+  function openPonConfig(port: PonPortItem) {
+    setPonConfigPort(port)
+    setPonForm({
+      admin_state:       port.admin_state,
+      description:       port.description ?? '',
+      min_range_meters:  port.min_range_meters,
+      max_range_meters:  port.max_range_meters,
+    })
+  }
+
+  async function handleSavePonPort() {
+    if (!ponConfigPort) return
+    setPonSaving(true)
+    try {
+      await oltApi.updatePonPort(ponConfigPort.id, {
+        admin_state:      ponForm.admin_state,
+        description:      ponForm.description || undefined,
+        min_range_meters: ponForm.min_range_meters,
+        max_range_meters: ponForm.max_range_meters,
+      })
+      // Atualiza localmente sem refetch completo
+      setPonConfigPort(null)
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao salvar.')
+    } finally { setPonSaving(false) }
+  }
+
+  async function handleRestartOnus() {
+    if (!restartPort) return
+    setRestarting(true)
+    try {
+      await oltApi.restartPonPortOnus(restartPort.id)
+      setRestartPort(null)
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao reiniciar.')
+    } finally { setRestarting(false) }
+  }
 
   function openConfigPort(port: UplinkPortItem) {
     setConfigPort(port)
@@ -237,13 +284,13 @@ export default function OltDetailPage() {
 
           {/* Action buttons */}
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={() => router.push(`/olts/${oltId}/edit`)}>
+            <Button size="sm" className="bg-black text-white hover:bg-black/80 border-0" onClick={() => router.push(`/olts/${oltId}/edit`)}>
               <Pencil className="h-3.5 w-3.5" /> Editar configurações de OLT
             </Button>
-            <Button size="sm" variant="outline" onClick={() => router.push(`/olts/${oltId}/history`)}>
+            <Button size="sm" className="bg-black text-white hover:bg-black/80 border-0" onClick={() => router.push(`/olts/${oltId}/history`)}>
               <History className="h-3.5 w-3.5" /> Histórico
             </Button>
-            <Button size="sm" variant="outline" onClick={() => router.push(`/olts/${oltId}/backups`)}>
+            <Button size="sm" className="bg-black text-white hover:bg-black/80 border-0" onClick={() => router.push(`/olts/${oltId}/backups`)}>
               <HardDrive className="h-3.5 w-3.5" /> Backups
             </Button>
           </div>
@@ -351,7 +398,7 @@ export default function OltDetailPage() {
                       <td className="px-4 py-3">
                         <button
                           type="button"
-                          onClick={() => { setSelectedBoard(b); setActiveTab('pon-ports') }}
+                          onClick={() => setRestartBoard(b)}
                           className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors whitespace-nowrap"
                         >
                           Cartão de configuração
@@ -368,47 +415,272 @@ export default function OltDetailPage() {
 
       {/* ── PORTAS PON tab ── */}
       {activeTab === 'pon-ports' && (
-        <div className="pt-4">
-          <div className="flex flex-wrap gap-2 mb-4">
-            {(boards?.items ?? []).map(b => (
-              <button
-                key={b.id}
-                onClick={() => setSelectedBoard(b)}
-                className={cn(
-                  'rounded-md border px-3 py-1 text-xs font-medium transition-colors',
-                  selectedBoard?.id === b.id
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-input text-muted-foreground hover:bg-muted'
-                )}
-              >
-                Slot {b.slot_index} — {b.name}
-              </button>
-            ))}
+        <div className="pt-4 space-y-4">
+
+          {/* Toolbar */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" className="bg-black text-white hover:bg-black/80 border-0">Visualizar informações das portas PON</Button>
+            <Button size="sm" className="bg-black text-white hover:bg-black/80 border-0">Ativar todas as portas PON</Button>
+            <Button size="sm" className="bg-black text-white hover:bg-black/80 border-0">Ativar busca automática</Button>
           </div>
-          {!selectedBoard ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">Selecione um cartão acima.</p>
-          ) : loadingPonPorts ? (
-            <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10" />)}</div>
-          ) : !ponPorts?.items.length ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">Nenhuma porta PON encontrada.</p>
+
+          {loadingBoards ? (
+            <div className="space-y-4">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40" />)}</div>
+          ) : !(boards?.items.length) ? (
+            <p className="py-10 text-center text-sm text-muted-foreground">Nenhum cartão encontrado para esta OLT.</p>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-muted/40 text-xs text-muted-foreground">
-                  <th className="px-4 py-2 text-left w-16">Índice</th>
-                  <th className="px-4 py-2 text-left">Nome</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {ponPorts.items.map(p => (
-                  <tr key={p.id} className="hover:bg-muted/30">
-                    <td className="px-4 py-3 tabular-nums text-muted-foreground">{p.pon_index}</td>
-                    <td className="px-4 py-3 font-medium">{p.name}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            (boards.items).map(board => {
+              const boardPorts = (allPons?.items ?? []).filter(p => p.board_id === board.id)
+              return (
+                <div key={board.id} className="rounded-xl border overflow-hidden">
+                  {/* Título do slot */}
+                  <div className="px-4 py-2.5 bg-muted/40 border-b flex items-center justify-between">
+                    <span className="text-sm font-semibold">
+                      Slot OLT {board.slot_index}, tipo de placa: {board.board_type ?? board.name}
+                    </span>
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => setRestartPort({ id: -board.id, name: `Slot ${board.slot_index}`, pon_index: -1, admin_state: 'enabled', description: null, min_range_meters: 0, max_range_meters: 20000, onu_total: 0, onu_online: 0, avg_rx_dbm: null })}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        Reiniciar todas as ONUs no Slot {board.slot_index}
+                      </button>
+                      <span className="text-xs text-muted-foreground">{boardPorts.length} porta(s)</span>
+                    </div>
+                  </div>
+
+                  {boardPorts.length === 0 ? (
+                    <p className="px-4 py-6 text-sm text-muted-foreground">Nenhuma porta PON encontrada.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-[hsl(var(--primary))] text-xs text-white">
+                            <th className="px-4 py-2.5 text-left font-medium"></th>
+                            <th className="px-4 py-2.5 text-left font-medium">Estado admin.</th>
+                            <th className="px-4 py-2.5 text-left font-medium">ONUs</th>
+                            <th className="px-4 py-2.5 text-left font-medium">Sinal médio</th>
+                            <th className="px-4 py-2.5 text-left font-medium">Descrição</th>
+                            <th className="px-4 py-2.5 text-left font-medium">Faixa de transmissão</th>
+                            <th className="px-4 py-2.5 text-left font-medium">Ação</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {boardPorts.map((p, i) => (
+                            <tr key={p.id} className={cn('border-b last:border-0', i % 2 === 0 ? 'bg-background' : 'bg-muted/20')}>
+                              <td className="px-4 py-3">
+                                <span className="text-sm font-medium tabular-nums">{p.pon_index}</span>
+                                <span className="ml-2 text-xs text-muted-foreground">GPON</span>
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {p.admin_state === 'enabled' ? 'Habilitado' : 'Desabilitado'}
+                              </td>
+                              <td className="px-4 py-3">
+                                <button
+                                  onClick={() => router.push(`/onus/configured?pon_port_id=${p.id}&status=online`)}
+                                  className="block text-xs text-primary hover:underline font-medium"
+                                >
+                                  Online: {p.onu_online}
+                                </button>
+                                <button
+                                  onClick={() => router.push(`/onus/configured?pon_port_id=${p.id}`)}
+                                  className="block text-xs text-primary hover:underline font-medium"
+                                >
+                                  Total: {p.onu_total}
+                                </button>
+                              </td>
+                              <td className="px-4 py-3 text-xs tabular-nums">
+                                {p.avg_rx_dbm !== null ? `${p.avg_rx_dbm} dBm` : '—'}
+                              </td>
+                              <td className="px-4 py-3 text-xs text-muted-foreground">{p.description || ''}</td>
+                              <td className="px-4 py-3 text-xs tabular-nums">
+                                {p.min_range_meters} - {p.max_range_meters} m
+                              </td>
+                              <td className="px-4 py-3">
+                                <button
+                                  onClick={() => openPonConfig(p)}
+                                  className="block text-xs text-primary hover:underline"
+                                >
+                                  Configurar
+                                </button>
+                                <button
+                                  onClick={() => setRestartPort(p)}
+                                  className="block text-xs text-primary hover:underline mt-0.5"
+                                >
+                                  Reiniciar ONUs
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )
+            })
           )}
+
+          {/* Modal: Configurar porta PON */}
+          {ponConfigPort && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+              <div className="w-full max-w-lg rounded-lg bg-white dark:bg-background shadow-2xl">
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 pt-5 pb-4">
+                  <h2 className="text-base font-semibold">Configurar porta PON {ponConfigPort.pon_index}</h2>
+                  <button onClick={() => setPonConfigPort(null)} className="text-muted-foreground hover:text-foreground">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Form — 2 colunas: label à esquerda, input à direita */}
+                <div className="px-6 pb-2 space-y-4">
+                  {/* Estado administrativo */}
+                  <div className="grid grid-cols-[180px_1fr] gap-4 items-start">
+                    <span className="text-sm text-right pt-1 text-foreground">Estado administrativo</span>
+                    <div className="space-y-1">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio" name="pon_admin_state" value="enabled"
+                          checked={ponForm.admin_state === 'enabled'}
+                          onChange={() => setPonForm(f => ({ ...f, admin_state: 'enabled' }))}
+                          className="accent-primary"
+                        />
+                        <span className="text-sm">Habilitado</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio" name="pon_admin_state" value="disabled"
+                          checked={ponForm.admin_state === 'disabled'}
+                          onChange={() => setPonForm(f => ({ ...f, admin_state: 'disabled' }))}
+                          className="accent-primary"
+                        />
+                        <span className="text-sm">Desabilitado</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Descrição do porto */}
+                  <div className="grid grid-cols-[180px_1fr] gap-4 items-center">
+                    <span className="text-sm text-right text-foreground">Descrição do porto</span>
+                    <input
+                      type="text"
+                      value={ponForm.description}
+                      onChange={e => setPonForm(f => ({ ...f, description: e.target.value }))}
+                      className="w-full rounded border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+
+                  {/* Intervalo mínimo */}
+                  <div className="grid grid-cols-[180px_1fr] gap-4 items-start">
+                    <span className="text-sm text-right pt-1.5 text-foreground">Intervalo mínimo</span>
+                    <div>
+                      <input
+                        type="number"
+                        value={ponForm.min_range_meters}
+                        onChange={e => setPonForm(f => ({ ...f, min_range_meters: Number(e.target.value) }))}
+                        className="w-40 rounded border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">metros</p>
+                    </div>
+                  </div>
+
+                  {/* Alcance máximo */}
+                  <div className="grid grid-cols-[180px_1fr] gap-4 items-start">
+                    <span className="text-sm text-right pt-1.5 text-foreground">Alcance máximo</span>
+                    <div>
+                      <input
+                        type="number"
+                        value={ponForm.max_range_meters}
+                        onChange={e => setPonForm(f => ({ ...f, max_range_meters: Number(e.target.value) }))}
+                        className="w-40 rounded border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">metros</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-end gap-2 px-6 py-4 border-t mt-2">
+                  <Button variant="outline" size="sm" onClick={() => setPonConfigPort(null)}>Fechar</Button>
+                  <Button size="sm" onClick={handleSavePonPort} disabled={ponSaving}>
+                    {ponSaving ? 'Salvando…' : 'Salvar'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal: Reiniciar ONUs */}
+          {restartPort && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+              <div className="w-full max-w-md rounded-lg bg-white dark:bg-background shadow-2xl px-6 py-5">
+                <div className="flex items-start justify-between mb-3">
+                  <h2 className="text-base font-semibold leading-snug pr-4">
+                    Reinicie as ONUs a partir da porta {restartPort.name}.
+                  </h2>
+                  <button onClick={() => setRestartPort(null)} className="text-muted-foreground hover:text-foreground shrink-0 mt-0.5">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Tem certeza de que deseja reiniciar todas as ONUs nesta porta PON?
+                </p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setRestartPort(null)}
+                    className="text-sm text-muted-foreground hover:text-foreground px-3 py-1.5"
+                  >
+                    Fechar
+                  </button>
+                  <Button size="sm" onClick={handleRestartOnus} disabled={restarting}>
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    {restarting ? 'Reiniciando…' : 'Reiniciar ONUs'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modal: Reiniciar placa OLT — global, visível em qualquer aba */}
+      {restartBoard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-white dark:bg-background shadow-2xl px-6 py-5">
+            <div className="flex items-start justify-between mb-3">
+              <h2 className="text-base font-semibold leading-snug pr-4">
+                Reinicie a placa OLT
+              </h2>
+              <button onClick={() => setRestartBoard(null)} className="text-muted-foreground hover:text-foreground shrink-0 mt-0.5">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">
+              Reinicie a placa OLT a partir do slot.{restartBoard.slot_index} ({restartBoard.board_type ?? restartBoard.name}) agora?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setRestartBoard(null)}
+                className="text-sm text-muted-foreground hover:text-foreground px-3 py-1.5"
+              >
+                Fechar
+              </button>
+              <Button
+                size="sm"
+                disabled={restartingBoard}
+                onClick={async () => {
+                  setRestartingBoard(true)
+                  await new Promise(r => setTimeout(r, 1000))
+                  setRestartingBoard(false)
+                  setRestartBoard(null)
+                }}
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                {restartingBoard ? 'Reiniciando…' : 'Reiniciar'}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 

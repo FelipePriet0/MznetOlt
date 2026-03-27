@@ -1,8 +1,4 @@
 
-Em dashboard: 
-
-Quero que as Tables: Activity feed e Falhas em portas PON tenham essa UI. 
-
 ## Instalação
 
 npx shadcn-ng@latest add https://www.originui-ng.com/r/table-03.json

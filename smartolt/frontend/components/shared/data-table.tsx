@@ -52,15 +52,15 @@ export function DataTable<T>({
   return (
     <div className="flex flex-col gap-0">
       {/* Table */}
-      <div className={cn("overflow-x-auto rounded-xl border border-border", containerClassName)}>
+      <div className={cn('relative w-full overflow-auto', containerClassName)}>
         <table className="w-full text-sm">
           <thead>
-            <tr className={cn('border-b bg-muted/50', headerRowClassName)}>
+            <tr className={cn('bg-[hsl(var(--primary))]', headerRowClassName)}>
               {columns.map(col => (
                 <th
                   key={col.key}
                   className={cn(
-                    'px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground',
+                    'px-4 py-2.5 text-left text-xs font-medium !text-white',
                     headerCellClassName,
                     col.className
                   )}
@@ -71,13 +71,14 @@ export function DataTable<T>({
             </tr>
           </thead>
 
-          <tbody className={cn("divide-y divide-border bg-card", bodyClassName)}>
+          <tbody className="table-row h-2" aria-hidden="true"></tbody>
+          <tbody className={cn('[&_td:first-child]:rounded-l-lg [&_td:last-child]:rounded-r-lg', bodyClassName)}>
             {loading ? (
               Array.from({ length: skeletonRows }).map((_, i) => (
                 <TableRowSkeleton key={i} cols={columns.length} />
               ))
             ) : data.length === 0 ? (
-              <tr>
+              <tr className="odd:bg-muted/50 odd:hover:bg-muted/50 border-none hover:bg-transparent">
                 <td
                   colSpan={columns.length}
                   className="px-4 py-12 text-center text-muted-foreground"
@@ -90,14 +91,14 @@ export function DataTable<T>({
                 <tr
                   key={i}
                   className={cn(
-                    'transition-colors',
-                    onRowClick && 'cursor-pointer hover:bg-muted/40',
+                    'odd:bg-[hsl(var(--secondary))]/20 odd:hover:bg-[hsl(var(--secondary))]/20 border-none hover:bg-transparent transition-colors',
+                    onRowClick && 'cursor-pointer',
                     rowClassName
                   )}
                   onClick={() => onRowClick?.(row)}
                 >
                   {columns.map(col => (
-                    <td key={col.key} className={cn('px-4 py-3', col.className)}>
+                    <td key={col.key} className={cn('px-4 py-2.5', col.className)}>
                       {col.cell(row)}
                     </td>
                   ))}
@@ -105,6 +106,7 @@ export function DataTable<T>({
               ))
             )}
           </tbody>
+          <tbody className="table-row h-2" aria-hidden="true"></tbody>
         </table>
       </div>
 

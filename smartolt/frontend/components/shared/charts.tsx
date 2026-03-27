@@ -23,6 +23,8 @@ export function SimpleBarChart({
   const svgRef = useRef<SVGSVGElement | null>(null)
   const [containerW, setContainerW] = useState<number>(480)
   const [hover, setHover] = useState<{ i: number; x: number; y: number } | null>(null)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
   useEffect(() => {
     if (!containerRef.current) return
     const el = containerRef.current
@@ -74,6 +76,9 @@ export function SimpleBarChart({
 
   return (
     <div ref={containerRef} className={cn('relative w-full', className)}>
+      {!mounted ? (
+        <div style={{ height }} />
+      ) : (
       <svg
         ref={svgRef}
         width={width}
@@ -120,6 +125,7 @@ export function SimpleBarChart({
           )
         })}
       </svg>
+      )}
       {hover && data[hover.i] && (
         <div
           className="pointer-events-none absolute z-10 rounded-md border bg-popover px-2 py-1 text-popover-foreground shadow-md"
@@ -154,6 +160,8 @@ export function SimpleStackedArea({
   const svgRef = useRef<SVGSVGElement | null>(null)
   const [containerW, setContainerW] = useState<number>(520)
   const [hover, setHover] = useState<{ i: number; x: number; y: number } | null>(null)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
   useEffect(() => {
     if (!containerRef.current) return
     const el = containerRef.current
@@ -222,6 +230,9 @@ export function SimpleStackedArea({
 
   return (
     <div ref={containerRef} className={cn('relative w-full', className)}>
+      {!mounted ? (
+        <div style={{ height }} />
+      ) : (
       <svg
         ref={svgRef}
         width={width}
@@ -261,6 +272,7 @@ export function SimpleStackedArea({
           )
         })}
       </svg>
+      )}
       {hover && data[hover.i] && (
         <div
           className="pointer-events-none absolute z-10 rounded-md border bg-popover px-2 py-1 text-popover-foreground shadow-md"

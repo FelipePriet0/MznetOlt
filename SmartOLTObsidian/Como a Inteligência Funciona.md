@@ -101,40 +101,50 @@ O técnico recebe uma mensagem em português claro, não uma tabela de números.
 ## Os Detectores (regras do job)
 
 ### Detector 1 — Tendência de queda de sinal
-**Dados usados:** `onu_signal_samples.rx_dbm`
-**Lógica:** regressão linear sobre as últimas N amostras. Se a inclinação for negativa além do threshold, é uma tendência real.
-**Parâmetros configuráveis:** janela de dias, inclinação mínima, sinal de urgência.
-**Distingue de falso positivo:** variação de temperatura gera ruído, não inclinação consistente.
+**Dados:** `onu_signal_samples.rx_dbm`
+**Lógica:** regressão linear sobre as últimas N amostras; inclinação negativa além do threshold indica tendência real.
+**Parâmetros:** janela (dias), inclinação mínima (dBm/dia), mínimo de pontos.
+**Distingue:** ruído térmico (oscila sem tendência) vs. queda consistente.
+**Urgência:** medium (alta se inclinação > 2× threshold ou RX já próximo do crítico)
 
 ---
 
 ### Detector 2 — Laser TX morrendo
-**Dados usados:** `onu_signal_samples.tx_dbm` + `rx_dbm`
-**Lógica:** TX em queda + RX estável = problema na ONU. TX em queda + RX em queda = problema na fibra.
-**Valor:** distingue automaticamente onde está o problema antes do técnico ir.
+**Dados:** `onu_signal_samples.tx_dbm` + `rx_dbm`
+**Lógica:** TX em queda com RX estável → provável falha no transmissor da ONU; TX em queda com RX em queda → provável atenuação na fibra.
+**Parâmetros:** janela (dias), queda mínima de TX, correlação com RX.
+**Distingue:** falha no equipamento vs. problema de enlace.
+**Urgência:** high (critical se TX abaixo de limite operacional)
 
 ---
 
 ### Detector 3 — Flapping (quedas repetidas)
-**Dados usados:** `network_events` (transições de status)
-**Lógica:** conta eventos `ONU_STATUS_CHANGED` online→offline nas últimas X horas. Acima de N quedas = ticket.
-**Correlação extra:** outras ONUs da mesma PON também flappando? Problema no tronco.
+**Dados:** `network_events` (transições de status)
+**Lógica:** conta online→offline em janela móvel; se > N no período, sinaliza.
+**Parâmetros:** janela (horas), N quedas, mínimo de estabilidade entre eventos.
+**Distingue:** reboot/atualização isolada vs. instabilidade crônica.
+**Urgência:** high (critical se múltiplas ONUs da mesma PON afetadas)
 
 ---
 
 ### Detector 4 — ONU fantasma (online sem tráfego)
-**Dados usados:** `onu_traffic_samples` + status atual
-**Lógica:** status online + sinal normal + tráfego abaixo de threshold por período em horário comercial.
-**Cuidado:** filtro de horário obrigatório (madrugada é normal ter tráfego zero).
+**Dados:** `onu_traffic_samples`, status atual, horário.
+**Lógica:** online + RX ok + tráfego < threshold por X horas em horário comercial.
+**Parâmetros:** janela, threshold de tráfego, faixa horária útil.
+**Distingue:** uso noturno/ocioso vs. anomalia operacional.
+**Urgência:** low (medium se persistente > 24–48h)
 
 ---
 
 ### Detector 5 — Queda reativa (evento instantâneo)
-**Dados usados:** `network_events` + correlação por PON/OLT
-**Lógica:** ONU foi de online para offline → ticket imediato. Cruza com outras ONUs para classificar:
-- 1 ONU: problema isolado no cliente
-- 3+ na mesma PON: provável corte no tronco
-- OLT inteira: incidente de infraestrutura
+**Dados:** `network_events`, correlação PON/OLT.
+**Lógica:** transição online→offline dispara evento; correlaciona simultaneidade por PON/OLT.
+**Parâmetros:** janela de correlação (min), limiar de ONUs afetadas.
+**Distingue:** queda isolada vs. incidente coletivo (PON/OLT).
+**Urgência:**
+- 1 ONU isolada: medium
+- ≥3 ONUs na mesma PON: high
+- Muitas ONUs/OLT inteira: critical
 
 ---
 
