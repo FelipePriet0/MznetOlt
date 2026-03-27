@@ -16,6 +16,9 @@ export function mapErrorToResponse(res: ApiResponse, error: unknown): void {
   }
 
   switch (error.name) {
+    case 'DefaultAuthorizationPresetNotFoundError':
+      notFound(res, error.message)
+      break
     case 'InvalidCredentialsError':
       unauthorized(res, error.message)
       break

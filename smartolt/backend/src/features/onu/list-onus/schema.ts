@@ -1,13 +1,37 @@
 import { z } from 'zod'
 
 export const ListOnusInputSchema = z.object({
-  olt_id: z.number().int().positive().optional(),
-  board_id: z.number().int().positive().optional(),
-  pon_port_id: z.number().int().positive().optional(),
-  status: z.string().optional(),
-  admin_state: z.string().optional(),
+  olt_id:       z.number().int().positive().optional(),
+  board_id:     z.number().int().positive().optional(),
+  pon_port_id:  z.number().int().positive().optional(),
+  status:       z.string().optional(),
+  admin_state:  z.string().optional(),
   serial_number: z.string().optional(),
-  page: z.number().int().min(1).default(1),
+  search:       z.string().optional(),
+  zone_id:      z.number().int().positive().optional(),
+  onu_type_id:  z.number().int().positive().optional(),
+  // Multi-select topology
+  olt_ids:      z.array(z.number().int().positive()).optional(),
+  board_ids:    z.array(z.number().int().positive()).optional(),
+  pon_port_ids: z.array(z.number().int().positive()).optional(),
+  zone_ids:     z.array(z.number().int().positive()).optional(),
+  onu_type_ids: z.array(z.number().int().positive()).optional(),
+  // Service column filters
+  pon_type_in:       z.array(z.string()).optional(),
+  vlan_ids:          z.array(z.number().int()).optional(),
+  mode_in:           z.array(z.string()).optional(),
+  download_profiles: z.array(z.string()).optional(),
+  upload_profiles:   z.array(z.string()).optional(),
+  profile_in:        z.array(z.string()).optional(),
+  tr069_enabled:     z.boolean().optional(),
+  catv_enabled:      z.boolean().optional(),
+  mgmt_ip_filter:    z.enum(['with', 'without']).optional(),
+  odb_filter:        z.enum(['with', 'without']).optional(),
+  // Status/signal
+  status_in:    z.array(z.string()).optional(),
+  admin_state_in: z.array(z.string()).optional(),
+  signal_levels: z.array(z.enum(['good', 'warning', 'critical'])).optional(),
+  page:      z.number().int().min(1).default(1),
   page_size: z.number().int().min(1).max(100).default(20),
 })
 

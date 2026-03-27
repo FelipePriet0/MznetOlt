@@ -6,7 +6,7 @@ export const ListOltsInputSchema = z.object({
   zone_id: z.number().int().positive().optional(),
   search: z.string().optional(),
   page: z.number().int().min(1).default(1),
-  page_size: z.number().int().min(1).max(100).default(20),
+  page_size: z.number().int().min(1).max(1000).default(20),
 })
 
 export const OltItemSchema = z.object({

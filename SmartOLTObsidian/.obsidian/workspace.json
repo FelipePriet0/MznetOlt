@@ -1,0 +1,255 @@
+{
+  "main": {
+    "id": "982dc457f546da1c",
+    "type": "split",
+    "children": [
+      {
+        "id": "a7278326429f81bd",
+        "type": "tabs",
+        "dimension": 50.6979695431472,
+        "children": [
+          {
+            "id": "3ff3bc4173e6debc",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "O que NÃO usamos.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "O que NÃO usamos"
+            }
+          },
+          {
+            "id": "a9cff2adec1a9206",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Onde paramos.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Onde paramos"
+            }
+          }
+        ],
+        "currentTab": 1
+      },
+      {
+        "id": "4ffe0dfe316d41dc",
+        "type": "tabs",
+        "dimension": 49.30203045685279,
+        "children": [
+          {
+            "id": "e61a026960736320",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Plano OLT Feature - Progresso.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Plano OLT Feature - Progresso"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "656bd60d6a0da966",
+    "type": "split",
+    "children": [
+      {
+        "id": "8034f819b4f3023f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "785e703441ea2401",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de arquivos"
+            }
+          },
+          {
+            "id": "e4e007dfbaa9cb4b",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Procurar"
+            }
+          },
+          {
+            "id": "538e69f4e5974b79",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Marcadores"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "23ef443bba228152",
+    "type": "split",
+    "children": [
+      {
+        "id": "0073ae257240693e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4e3841392f74895f",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "O que NÃO usamos.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Links inversos para O que NÃO usamos"
+            }
+          },
+          {
+            "id": "5b8cad49e12ae897",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "O que NÃO usamos.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Links de saída para O que NÃO usamos"
+            }
+          },
+          {
+            "id": "e715f5c987f33282",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etiquetas"
+            }
+          },
+          {
+            "id": "c9439aa4927f73dc",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Todas as propriedades"
+            }
+          },
+          {
+            "id": "d0a1dcad2665c89f",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "O que NÃO usamos.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Sumário de O que NÃO usamos"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Abrir a troca rápida": false,
+      "graph:Abrir visualização em gráfico": false,
+      "canvas:Criar novo canvas": false,
+      "daily-notes:Abrir a nota de hoje": false,
+      "templates:Inserir modelo": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Criar nova base": false
+    }
+  },
+  "active": "a9cff2adec1a9206",
+  "lastOpenFiles": [
+    "O que NÃO usamos.md",
+    "Onde paramos.md",
+    "Plano OLT Feature - Progresso.md",
+    "integracao-cli-olt-pendencias.md",
+    "Forma de Ativação.md",
+    "To do.md",
+    "SmartoltLikeApp.md",
+    "Plano para erros do advisorsupabase.md",
+    "Pasted image 20260326164004.png",
+    "MznetOLT diagram.md",
+    "Integracao-WPP-Agendamento.md",
+    "Como a Inteligência Funciona.md",
+    "A tractian dos Provedores.md",
+    "Roadmap das Features/Gerenciamento de Zonas (Derivado de Settings).md",
+    "Roadmap das Features/Detalhe da ONU.md",
+    "Roadmap das Features/Olts/Uplink.md",
+    "Roadmap das Features/Olts/OLTs.md",
+    "Roadmap das Features/Olts/Lista de OLTs (Derivado de OLTs).md",
+    "Roadmap das Features/Olts/Editar OLT (Derivado de OLT).md",
+    "Roadmap das Features/Olts/Detalhes da OLT (Derivado de OLT).md",
+    "Roadmap das Features/Olts/Adicionar OLT (Derivado de OLTs).md",
+    "Roadmap das Features/Settings.md",
+    "Roadmap das Features/Traffic.md",
+    "Roadmap das Features/System.md",
+    "Roadmap das Features/Signal.md",
+    "Roadmap das Features/Locations (Derivado de Settings).md",
+    "Roadmap das Features/Olts",
+    "Pasted image 20260325091233.png",
+    "Roadmap das Features"
+  ]
+}

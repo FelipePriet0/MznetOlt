@@ -1,43 +1,25 @@
 import { supabase } from '@/shared/lib/supabase'
 import type { DashboardOnuSignalStatsOutput } from './types'
 
-type SignalSampleRow = {
-  onu_id: number
-  rx_dbm: number
-  tx_dbm: number | null
-  collected_at: string
-}
-
 export async function fetchDashboardOnuSignalStatsRepository(
   warning_threshold_dbm: number,
   critical_threshold_dbm: number
 ): Promise<DashboardOnuSignalStatsOutput> {
+  // Lê last_known_signal da tabela onus (valor mais recente persitido)
   const { data, error } = await supabase
-    .from('onu_signal_samples')
-    .select('onu_id, rx_dbm, tx_dbm, collected_at')
-    .order('onu_id', { ascending: true })
-    .order('collected_at', { ascending: false })
+    .from('onus')
+    .select('last_known_signal')
+    .not('last_known_signal', 'is', null)
 
-  if (error) {
-    throw error
-  }
-
-  const latestByOnu = new Map<number, SignalSampleRow>()
-
-  for (const row of (data ?? []) as SignalSampleRow[]) {
-    if (!latestByOnu.has(row.onu_id)) {
-      latestByOnu.set(row.onu_id, row)
-    }
-  }
+  if (error) throw error
 
   let sampled_onus = 0
   let weak_signal_onus = 0
   let critical_signal_onus = 0
 
-  for (const sample of latestByOnu.values()) {
+  for (const row of (data ?? []) as { last_known_signal: number }[]) {
     sampled_onus += 1
-    const rx = sample.rx_dbm
-
+    const rx = row.last_known_signal
     if (rx <= critical_threshold_dbm) {
       critical_signal_onus += 1
     } else if (rx <= warning_threshold_dbm) {

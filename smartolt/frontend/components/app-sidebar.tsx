@@ -13,7 +13,7 @@ import {
   SidebarMenuButton,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { BarChart3, Smartphone, Wifi, Shield, FileText, Zap, Settings, LogOut } from 'lucide-react'
+import { BarChart3, Smartphone, Wifi, Shield, FileText, Settings, LogOut, BellDot } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 
 export function AppSidebar() {
@@ -25,10 +25,9 @@ export function AppSidebar() {
     { label: 'Não configuradas', href: '/onus/unconfigured', icon: Smartphone },
     { label: 'Configuradas', href: '/onus/configured', icon: Smartphone },
     { label: 'OLTs', href: '/olts', icon: Wifi },
-    { label: 'Authorization', href: '/authorization', icon: Shield },
-    { label: 'Reports', href: '/reports', icon: FileText },
-    { label: 'Diagnostics', href: '/diagnostics', icon: Zap },
-    { label: 'Settings', href: '/settings', icon: Settings },
+    { label: 'Tickets', href: '/tickets', icon: BellDot },
+    // Authorization removida do menu; agora inline na página de Não configuradas
+    { label: 'Configurações', href: '/settings', icon: Settings },
   ]
 
   return (
@@ -69,7 +68,7 @@ export function AppSidebar() {
             <p className="text-[10px] opacity-80 truncate capitalize">{user?.role_code ?? ''}</p>
           </div>
           <button onClick={logout} className="ml-auto inline-flex items-center gap-1.5 text-xs hover:underline">
-            <LogOut className="h-3.5 w-3.5" /> Sign out
+            <LogOut className="h-3.5 w-3.5" /> Sair
           </button>
         </div>
       </SidebarFooter>

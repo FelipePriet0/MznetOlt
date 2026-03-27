@@ -1,0 +1,148 @@
+Inputs (Filtros)
+
+Search (Campo de busca para localizar ONUs por SN, IP, nome, endereço ou outras informações relacionadas à ONU)
+
+OLT (Popover com lista de OLTs disponíveis para filtrar ONUs conectadas a uma OLT específica, NESSE POPOVER são listados apenas a OLT)
+
+Board (Popover com lista de placas/slots da OLT, permitindo filtrar ONUs associadas a um board/Quadro específico)
+
+Port (Popover com lista de portas PON, permitindo filtrar ONUs conectadas a uma porta específica) 
+
+Zone (Popover com lista de zonas cadastradas no sistema, permitindo filtrar ONUs por localização operacional)
+
+ODB (Popover com lista de divisores ópticos cadastrados, permitindo filtrar ONUs associadas a um divisor específico)
+
+VLAN (Popover com lista de VLANs disponíveis, permitindo filtrar ONUs associadas a uma VLAN específica)
+
+ONU type (Popover com lista de tipos/modelos de ONU, permitindo filtrar ONUs por modelo de equipamento)
+
+Profile (Popover com lista de perfis configurados para ONUs, permitindo filtrar ONUs associadas a um perfil específico)
+
+PON type (Popover com lista de tipos de tecnologia PON, permitindo filtrar ONUs por tecnologia utilizada, como GPON, XG-PON ou XGS-PON)
+
+Status (Filtro por estado operacional da ONU)
+
+- ONUs Online 
+
+- ONUs com falha de Energia
+
+- ONUs Perda de sinal
+
+- ONUs Offline
+
+- Administrador desativado
+
+
+- Signal (Filtro por qualidade de sinal óptico da ONU)
+
+níveis de sinal bons
+
+níveis de sinal aviso
+
+níveis de sinal crítico
+
+
+B (Filtro para exibir ONUs em modo Bridge)
+
+R (Filtro para exibir ONUs em modo Router
+
+Ordenação (Controle para alterar o modo de ordenação da listagem)
+
+Mgnt IP (Popover para filtrar ONUs por configuração de IP de gerenciamento (Inativo / IP Estático / DHCP)
+
+TR-069 (Popover para filtrar ONUs por perfil TR-069 configurado (Habilitado / Desabilitado)) 
+
+VoIP (Popover para filtrar ONUs que possuem configuração de serviço VoIP (Habilitado / Desabilitado)) 
+
+CATV (Popover para filtrar ONUs que possuem serviço de TV por cabo configurado (Habilitado / Desabilitado))
+
+Download (Popover com perfis de velocidade de download para filtrar ONUs com determinada velocidade configurada)
+
+Upload (Popover com perfis de velocidade de upload para filtrar ONUs com determinada velocidade configurada)
+
+CTA: Exportar
+
+
+Lista de ONUs configuradas
+
+Objeto
+
+ONU (Listagem de ONUs já provisionadas e autorizadas na rede GPON, exibindo informações operacionais e de configuração de cada dispositivo)
+
+Informações exibidas (Lista)
+
+A tabela apresenta múltiplos registros de ONUs configuradas no sistema. Cada linha representa uma ONU e contém as seguintes colunas:
+
+Status
+Indicador visual do estado operacional da ONU na rede (ex.: online/conectada).
+
+Visualizar
+Botão “Visualizar” que abre a página de detalhes e gerenciamento da ONU selecionada.
+
+Nome
+Nome associado à ONU, normalmente representando o cliente ou local da instalação.
+
+SN / MAC
+Identificador único do equipamento ONU, exibindo o Serial Number ou MAC Address do dispositivo.
+
+ONU
+Identificação da localização lógica da ONU dentro da rede GPON, incluindo:
+
+OLT
+
+Board
+
+Porta PON
+
+ID da ONU na PON
+
+Zona
+Zona ou área operacional associada à instalação da ONU.
+
+ODB
+Identificação do divisor óptico (Optical Distribution Box) ao qual a ONU está associada.
+
+Sinal
+Indicador visual da qualidade do sinal óptico recebido pela ONU.
+
+B / R
+Indicação do modo de operação da ONU:
+
+B = Bridge (Ponte)
+
+R = Router
+
+VLAN
+VLAN associada ao serviço configurado para a ONU.
+
+VoIP
+Indicação de configuração de serviço de telefonia IP na ONU.
+
+TV
+Indicação de configuração de serviço de TV (ex.: CATV).
+
+Tipo
+Modelo ou tipo do equipamento ONU.
+
+Data de autenticação
+Data em que a ONU foi autenticada ou autorizada na rede.
+
+Paginação
+
+A listagem apresenta paginação no topo da tabela.
+
+O sistema exibe:
+
+“1–100 ONUs de 10310 exibidas”, indicando:
+
+quantidade de registros exibidos na página atual
+
+total de ONUs cadastradas no sistema
+
+Controles de navegação permitem acessar outras páginas da listagem (Cada página tem 100 conexões Listadas, e ao trocar, o filtro deve permanecer no topo):
+
+páginas numeradas
+
+próxima página
+
+última página

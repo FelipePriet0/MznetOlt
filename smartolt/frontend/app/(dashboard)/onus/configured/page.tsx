@@ -1,10 +1,11 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useApi } from '@/hooks/use-api'
 import { onuApi, type OnuItem, type OnuListFilters } from '@/lib/api/onu'
 import { oltApi, type OltItem } from '@/lib/api/olt'
+import { settingsApi, type ZoneItem } from '@/lib/api/settings'
 import { DataTable, type Column } from '@/components/shared/data-table'
 import { StatusBadge } from '@/components/shared/status-badge'
 import { Button } from '@/components/ui/button'
@@ -12,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import {
   Wifi, WifiOff, PlugZap, Signal, Ban, Search, ChevronDown,
-  RefreshCw, Eye, Download, Wrench,
+  Eye, Download, Wrench, Lock, Check,
 } from 'lucide-react'
 
 /* ─── Signal chip (tabela) ───────────────────────────────────── */
@@ -20,8 +21,8 @@ function SignalChip({ dbm }: { dbm: number | null }) {
   if (dbm === null) return <span className="text-xs text-muted-foreground">—</span>
   const v = dbm < -27 ? 'text-destructive' : dbm < -24 ? 'text-warning' : 'text-success'
   return (
-    <span className={cn('inline-flex items-center gap-1 text-xs font-mono font-medium', v)}>
-      <Signal className="h-3 w-3" />
+    <span className={cn('inline-flex items-center gap-1 text-sm font-mono font-bold', v)}>
+      <Signal className="h-4 w-4" strokeWidth={3} />
       {dbm} dBm
     </span>
   )
@@ -46,24 +47,36 @@ interface FilterCellProps {
   onToggle: () => void
   dropRef: React.RefObject<HTMLDivElement>
   children: React.ReactNode
+  /** Marca o filtro como não implementado — exibe "Em breve" e bloqueia interação */
+  disabled?: boolean
 }
-function FilterCell({ label, value, open, onToggle, dropRef, children }: FilterCellProps) {
+function FilterCell({ label, value, open, onToggle, dropRef, children, disabled }: FilterCellProps) {
   return (
-    <div ref={dropRef} className="flex-1 min-w-0 flex items-center gap-1.5">
+    <div
+      ref={dropRef}
+      className={cn('flex-1 min-w-0 flex items-center gap-1.5', disabled && 'opacity-40')}
+    >
       <span className="text-xs font-bold whitespace-nowrap shrink-0">{label}</span>
       <div className="relative flex-1 min-w-0">
         <button
           type="button"
-          onClick={onToggle}
+          onClick={disabled ? undefined : onToggle}
+          disabled={disabled}
+          title={disabled ? 'Em breve' : undefined}
           className={cn(
-            'w-full h-8 flex items-center justify-between gap-1 rounded-md border border-input bg-background px-2.5 text-xs transition-colors duration-200 hover:bg-muted hover:text-foreground',
-            open && 'border-ring ring-2 ring-ring ring-offset-2 ring-offset-background',
+            'w-full h-8 flex items-center justify-between gap-1 rounded-md border border-input bg-background px-2.5 text-xs transition-colors duration-200',
+            !disabled && 'hover:bg-muted hover:text-foreground',
+            disabled && 'cursor-not-allowed',
+            open && !disabled && 'border-ring ring-2 ring-ring ring-offset-2 ring-offset-background',
           )}
         >
-          <span className="truncate">{value}</span>
-          <ChevronDown className={cn('h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200', open && 'rotate-180')} />
+          <span className="truncate">{disabled ? 'Em breve' : value}</span>
+          {disabled
+            ? <Lock className="h-3 w-3 shrink-0 text-muted-foreground" />
+            : <ChevronDown className={cn('h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200', open && 'rotate-180')} />
+          }
         </button>
-        {open && (
+        {open && !disabled && (
           <div className="absolute left-0 z-30 mt-1 min-w-[160px] w-full rounded-md border border-input bg-popover p-1 shadow-lg">
             {children}
           </div>
@@ -84,6 +97,39 @@ function Opt({ label, onClick }: { label: string; onClick: () => void }) {
   )
 }
 
+/* ─── CheckOpt: checkbox item para multi-seleção ─────────────── */
+function CheckOpt({ label, checked, onClick }: { label: string; checked: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      className="w-full flex items-center gap-2 px-3 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors"
+      onClick={onClick}
+    >
+      <div className={cn(
+        'h-4 w-4 shrink-0 rounded-[4px] border flex items-center justify-center transition-colors',
+        checked ? 'bg-primary border-primary text-primary-foreground' : 'border-input bg-background',
+      )}>
+        {checked && <Check className="h-2.5 w-2.5" strokeWidth={3} />}
+      </div>
+      <span className="truncate text-left">{label}</span>
+    </button>
+  )
+}
+
+/* ─── multiLabel: texto do botão para multi-seleção ──────────── */
+function multiLabel<T extends number>(
+  set: Set<T>,
+  options: { id: T; name: string }[],
+  noun: string,
+): string {
+  if (!set.size) return 'Qualquer'
+  if (set.size === 1) {
+    const id = Array.from(set)[0]
+    return options.find(o => o.id === id)?.name ?? `#${id}`
+  }
+  return `${set.size} ${noun}`
+}
+
 /* ─── Types ───────────────────────────────────────────────────── */
 type StatusIconKey = 'online' | 'power_fail' | 'loss_signal' | 'offline' | 'admin_disabled'
 
@@ -92,11 +138,16 @@ export default function OnusConfiguredPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const [filters,     setFilters]     = useState<OnuListFilters>({ page: 1, page_size: 50, status: 'configured' })
-  const [statusIcon,  setStatusIcon]  = useState<StatusIconKey | null>(null)
-  const [brMode,      setBrMode]      = useState<'bridge' | 'router' | null>(null)
-  const [signalLevel, setSignalLevel] = useState<'good' | 'warning' | 'critical' | null>(null)
+  const [filters,     setFilters]     = useState<OnuListFilters>({ page: 1, page_size: 50, status_in: ['online','offline'] })
+  const [statusSet,   setStatusSet]   = useState<Set<StatusIconKey>>(new Set())
+  const [signalSet,   setSignalSet]   = useState<Set<'good' | 'warning' | 'critical'>>(new Set())
   const [searchInput, setSearchInput] = useState('')
+
+  // Multi-select Sets para filtros de topologia
+  const [oltSet,     setOltSet]     = useState<Set<number>>(new Set())
+  const [boardSet,   setBoardSet]   = useState<Set<number>>(new Set())
+  const [portSet,    setPortSet]    = useState<Set<number>>(new Set())
+  const [zoneSet,    setZoneSet]    = useState<Set<number>>(new Set())
 
   const [oltOpen,     setOltOpen]     = useState(false)
   const [boardOpen,   setBoardOpen]   = useState(false)
@@ -104,7 +155,7 @@ export default function OnusConfiguredPage() {
   const [zoneOpen,    setZoneOpen]    = useState(false)
   const [odbOpen,     setOdbOpen]     = useState(false)
   const [vlanOpen,    setVlanOpen]    = useState(false)
-  const [onuTypeOpen, setOnuTypeOpen] = useState(false)
+  // removed: Tipo de ONU filter
   const [profileOpen, setProfileOpen] = useState(false)
   const [ponTypeOpen, setPonTypeOpen] = useState(false)
   const [mgmtOpen,    setMgmtOpen]    = useState(false)
@@ -120,7 +171,7 @@ export default function OnusConfiguredPage() {
   const zoneRef    = useRef<HTMLDivElement>(null)
   const odbRef     = useRef<HTMLDivElement>(null)
   const vlanRef    = useRef<HTMLDivElement>(null)
-  const onuTypeRef = useRef<HTMLDivElement>(null)
+  // removed: Tipo de ONU filter ref
   const profileRef = useRef<HTMLDivElement>(null)
   const ponTypeRef = useRef<HTMLDivElement>(null)
   const mgmtRef    = useRef<HTMLDivElement>(null)
@@ -133,7 +184,7 @@ export default function OnusConfiguredPage() {
   const allDropdowns: [React.RefObject<HTMLDivElement>, React.Dispatch<React.SetStateAction<boolean>>][] = [
     [oltRef, setOltOpen], [boardRef, setBoardOpen], [portRef, setPortOpen],
     [zoneRef, setZoneOpen], [odbRef, setOdbOpen], [vlanRef, setVlanOpen],
-    [onuTypeRef, setOnuTypeOpen], [profileRef, setProfileOpen], [ponTypeRef, setPonTypeOpen],
+    [profileRef, setProfileOpen], [ponTypeRef, setPonTypeOpen],
     [mgmtRef, setMgmtOpen], [tr069Ref, setTr069Open], [voipRef, setVoipOpen],
     [catvRef, setCatvOpen], [dlRef, setDlOpen], [ulRef, setUlOpen],
   ]
@@ -158,48 +209,70 @@ export default function OnusConfiguredPage() {
   }, [])
 
   const olts = useApi(() => oltApi.list({ page_size: 1000 }))
+  const boards   = useApi(() => oltApi.allBoards(),   [])
+  const ponPorts = useApi(() => oltApi.allPonPorts(), [])
+  // onu types feature removed
+  const zones = useApi(() => settingsApi.zones(), [])
   const fetcher = useCallback(() => onuApi.list(filters), [filters])
   const { data, loading, refetch } = useApi(fetcher, [filters])
 
   useEffect(() => {
     const s = searchParams.get('status') || undefined
     if (s === 'online' || s === 'offline') {
-      setStatusIcon(s as StatusIconKey)
-      setFilters(f => ({ ...f, status: s, admin_state: undefined, page: 1 }))
-    } else if (s === 'admin_disabled') {
-      setStatusIcon('admin_disabled')
-      setFilters(f => ({ ...f, status: undefined, admin_state: 'disabled', page: 1 }))
+      setStatusSet(new Set([s as StatusIconKey]))
+      setFilters(f => ({ ...f, status_in: [s], admin_state_in: undefined, page: 1 }))
+    } else {
+      // Base padrão rígida: somente ONUs online/offline (exclui 'unconfigured' e 'admin_disabled')
+      setFilters(f => ({ ...f, status_in: ['online','offline'], admin_state_in: undefined, page: 1 }))
+    }
+
+    const sig = searchParams.get('signal') || undefined
+    if (sig) {
+      const levels = sig.split(',').filter(
+        l => l === 'warning' || l === 'critical' || l === 'good'
+      ) as ('good' | 'warning' | 'critical')[]
+      if (levels.length) {
+        setSignalSet(new Set(levels))
+        setFilters(f => ({ ...f, signal_levels: levels as any, page: 1 }))
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function applySearch() {
-    setFilters(f => ({ ...f, serial_number: searchInput || undefined, page: 1 }))
-  }
+  // Atualiza filtros automaticamente ao digitar/apagar (debounced)
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      const term = searchInput.trim()
+      setFilters(f => ({ ...f, search: term || undefined, page: 1 }))
+    }, 300)
+    return () => clearTimeout(handle)
+  }, [searchInput])
 
   const oltOptions: OltItem[] = olts.data?.items ?? []
-  const boardOptions = useMemo(() => {
-    const m = new Map<number, string>()
-    for (const it of data?.items ?? []) m.set(it.board_id, it.board_name)
-    return Array.from(m.entries()).map(([id, name]) => ({ id, name }))
-  }, [data])
-  const portOptions = useMemo(() => {
-    const m = new Map<number, string>()
-    for (const it of data?.items ?? []) m.set(it.pon_port_id, it.pon_port_name)
-    return Array.from(m.entries()).map(([id, name]) => ({ id, name }))
-  }, [data])
+  const boardOptions = boards.data?.items ?? []
+  const portOptions = ponPorts.data?.items ?? []
+  const zoneOptions: ZoneItem[] = zones.data?.items ?? []
+  const onuTypeOptions: { id: number; name: string }[] = []
 
-  function applyStatus(key: StatusIconKey | null) {
-    setStatusIcon(key)
-    setFilters(f => {
-      const base = { ...f, page: 1 }
-      if (!key) return { ...base, status: 'configured', admin_state: undefined }
-      switch (key) {
-        case 'online':         return { ...base, status: 'online',  admin_state: undefined }
-        case 'offline':        return { ...base, status: 'offline', admin_state: undefined }
-        case 'admin_disabled': return { ...base, admin_state: 'disabled', status: undefined }
-        default:               return { ...base, status: 'offline', admin_state: undefined }
+  function toggleStatus(key: StatusIconKey) {
+    if (key === 'admin_disabled') return
+    setStatusSet(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key); else next.add(key)
+      // Build filters
+      let statuses = Array.from(next)
+      const admin: string[] = []
+      if (statuses.length === 0) {
+        // Se usuário desmarcar tudo, mantém base de configuradas (online/offline)
+        statuses = ['online','offline']
       }
+      setFilters(f => ({
+        ...f,
+        page: 1,
+        status_in: statuses.length ? statuses : undefined,
+        admin_state_in: undefined,
+      }))
+      return next
     })
   }
 
@@ -214,43 +287,67 @@ export default function OnusConfiguredPage() {
           <Eye className="h-3.5 w-3.5" /> Ver
         </Button>
       ) },
-    // Nome (placeholder)
-    { key: 'name', header: 'Nome',
-      cell: _ => <span className="text-sm text-muted-foreground">—</span> },
+    // Nome da conexão
+    { key: 'name', header: 'Nome', className: 'max-w-[200px] whitespace-normal break-words',
+      cell: row => row.name
+        ? <span className="text-sm font-medium break-words">{row.name}</span>
+        : <span className="text-sm text-muted-foreground">—</span> },
     // SN / MAC
     { key: 'sn',  header: 'SN / MAC',
       cell: row => <span className="font-mono text-sm">{row.serial_number}</span> },
     // ONU (placeholder)
     { key: 'onu', header: 'ONU',
-      cell: _ => <span className="text-sm text-muted-foreground">—</span> },
+      cell: row => (row.onu_index ?? null) !== null
+        ? <span className="text-sm">{row.onu_index}</span>
+        : <span className="text-sm text-muted-foreground">—</span> },
     // Zona (placeholder)
     { key: 'zone', header: 'Zona',
-      cell: _ => <span className="text-sm text-muted-foreground">—</span> },
+      cell: row => row.zone_name
+        ? <span className="text-sm">{row.zone_name}</span>
+        : <span className="text-sm text-muted-foreground">—</span> },
     // ODB (placeholder)
     { key: 'odb', header: 'ODB',
-      cell: _ => <span className="text-sm text-muted-foreground">—</span> },
+      cell: row => (row.odb_name || row.odb_splitter)
+        ? <span className="text-sm">{row.odb_name ?? row.odb_splitter}</span>
+        : <span className="text-sm text-muted-foreground">—</span> },
     // Sinal
     { key: 'signal', header: 'Sinal',
       cell: row => <SignalChip dbm={row.last_known_signal} /> },
     // B/R (placeholder)
     { key: 'br', header: 'B/R',
-      cell: _ => <span className="text-sm text-muted-foreground">—</span> },
+      cell: row => row.mode
+        ? <span className="text-sm font-bold">{row.mode?.toLowerCase() === 'bridge' ? 'B' : row.mode?.toLowerCase() === 'router' ? 'R' : row.mode}</span>
+        : <span className="text-sm text-muted-foreground">—</span> },
     // VLAN (placeholder)
     { key: 'vlan', header: 'VLAN',
-      cell: _ => <span className="text-sm text-muted-foreground">—</span> },
+      cell: row => (row.vlan_id ?? null) !== null
+        ? <span className="text-sm">{row.vlan_id}</span>
+        : <span className="text-sm text-muted-foreground">—</span> },
     // VoIP (placeholder)
     { key: 'voip', header: 'VoIP',
-      cell: _ => <span className="text-sm text-muted-foreground">—</span> },
+      cell: row => row.voip_enabled === true ? (
+        <span className="text-sm">Sim</span>
+      ) : row.voip_enabled === false ? (
+        <span className="text-sm">Não</span>
+      ) : (
+        <span className="text-sm text-muted-foreground">—</span>
+      ) },
     // TV (placeholder)
     { key: 'tv', header: 'TV',
-      cell: _ => <span className="text-sm text-muted-foreground">—</span> },
+      cell: row => row.catv_enabled === true ? (
+        <span className="text-sm">Sim</span>
+      ) : row.catv_enabled === false ? (
+        <span className="text-sm">Não</span>
+      ) : (
+        <span className="text-sm text-muted-foreground">—</span>
+      ) },
     // Tipo (vendor + model)
     { key: 'type', header: 'Tipo',
       cell: row => <span className="text-sm">{row.onu_vendor ?? '—'} {row.onu_model ?? ''}</span> },
     // Data de autenticação
     { key: 'auth', header: 'Data de autenticação',
       cell: row => (
-        <span className="text-xs text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           {new Date(row.created_at).toLocaleDateString('pt-BR')}
         </span>
       ) },
@@ -298,9 +395,6 @@ export default function OnusConfiguredPage() {
 
       {/* Actions (no title/subtitle) */}
       <div className="flex items-center justify-end gap-2">
-        <Button variant="outline" size="sm" onClick={refetch}>
-          <RefreshCw className="h-3.5 w-3.5" /> Atualizar
-        </Button>
         <Button size="sm" onClick={exportCsv}>
           <Download className="h-3.5 w-3.5" /> Exportar
         </Button>
@@ -321,39 +415,97 @@ export default function OnusConfiguredPage() {
                 placeholder="SN, IP, nome, endereço…"
                 value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && applySearch()}
                 className="h-8 pl-8 text-xs w-full"
               />
             </div>
           </div>
 
-          <FilterCell label="OLT" value={filters.olt_id ? `#${filters.olt_id}` : 'Qualquer'}
-            open={oltOpen} onToggle={() => setOltOpen(v => !v)} dropRef={oltRef}>
-            <Opt label="Qualquer" onClick={() => { setFilters(f => ({ ...f, olt_id: undefined, page: 1 })); setOltOpen(false) }} />
+          {/* ── OLT multi-select ── */}
+          <FilterCell
+            label="OLT"
+            value={multiLabel(oltSet, oltOptions.map(o => ({ id: o.id, name: `[${o.id}] ${o.name}` })), 'OLTs')}
+            open={oltOpen} onToggle={() => setOltOpen(v => !v)} dropRef={oltRef}
+          >
+            <CheckOpt label="Qualquer (limpar)" checked={oltSet.size === 0}
+              onClick={() => { setOltSet(new Set()); setFilters(f => ({ ...f, olt_ids: undefined, page: 1 })) }} />
             {oltOptions.map(o => (
-              <Opt key={o.id} label={`[${o.id}] ${o.name}`} onClick={() => { setFilters(f => ({ ...f, olt_id: o.id, page: 1 })); setOltOpen(false) }} />
+              <CheckOpt key={o.id} label={`[${o.id}] ${o.name}`} checked={oltSet.has(o.id)}
+                onClick={() => {
+                  setOltSet(prev => {
+                    const next = new Set(prev)
+                    next.has(o.id) ? next.delete(o.id) : next.add(o.id)
+                    const arr = Array.from(next)
+                    setFilters(f => ({ ...f, olt_ids: arr.length ? arr : undefined, page: 1 }))
+                    return next
+                  })
+                }} />
             ))}
           </FilterCell>
 
-          <FilterCell label="Quadro" value={filters.board_id ? `Board ${filters.board_id}` : 'Qualquer'}
-            open={boardOpen} onToggle={() => setBoardOpen(v => !v)} dropRef={boardRef}>
-            <Opt label="Qualquer" onClick={() => { setFilters(f => ({ ...f, board_id: undefined, page: 1 })); setBoardOpen(false) }} />
+          {/* ── Quadro multi-select ── */}
+          <FilterCell
+            label="Quadro"
+            value={multiLabel(boardSet, boardOptions.map(b => ({ id: b.id, name: b.name })), 'quadros')}
+            open={boardOpen} onToggle={() => setBoardOpen(v => !v)} dropRef={boardRef}
+          >
+            <CheckOpt label="Qualquer (limpar)" checked={boardSet.size === 0}
+              onClick={() => { setBoardSet(new Set()); setFilters(f => ({ ...f, board_ids: undefined, page: 1 })) }} />
             {boardOptions.map(b => (
-              <Opt key={b.id} label={b.name} onClick={() => { setFilters(f => ({ ...f, board_id: b.id, page: 1 })); setBoardOpen(false) }} />
+              <CheckOpt key={b.id} label={b.name} checked={boardSet.has(b.id)}
+                onClick={() => {
+                  setBoardSet(prev => {
+                    const next = new Set(prev)
+                    next.has(b.id) ? next.delete(b.id) : next.add(b.id)
+                    const arr = Array.from(next)
+                    setFilters(f => ({ ...f, board_ids: arr.length ? arr : undefined, page: 1 }))
+                    return next
+                  })
+                }} />
             ))}
           </FilterCell>
 
-          <FilterCell label="Porta" value={filters.pon_port_id ? `Porta ${filters.pon_port_id}` : 'Qualquer'}
-            open={portOpen} onToggle={() => setPortOpen(v => !v)} dropRef={portRef}>
-            <Opt label="Qualquer" onClick={() => { setFilters(f => ({ ...f, pon_port_id: undefined, page: 1 })); setPortOpen(false) }} />
+          {/* ── Porta multi-select ── */}
+          <FilterCell
+            label="Porta"
+            value={multiLabel(portSet, portOptions.map(p => ({ id: p.id, name: p.name })), 'portas')}
+            open={portOpen} onToggle={() => setPortOpen(v => !v)} dropRef={portRef}
+          >
+            <CheckOpt label="Qualquer (limpar)" checked={portSet.size === 0}
+              onClick={() => { setPortSet(new Set()); setFilters(f => ({ ...f, pon_port_ids: undefined, page: 1 })) }} />
             {portOptions.map(p => (
-              <Opt key={p.id} label={p.name} onClick={() => { setFilters(f => ({ ...f, pon_port_id: p.id, page: 1 })); setPortOpen(false) }} />
+              <CheckOpt key={p.id} label={p.name} checked={portSet.has(p.id)}
+                onClick={() => {
+                  setPortSet(prev => {
+                    const next = new Set(prev)
+                    next.has(p.id) ? next.delete(p.id) : next.add(p.id)
+                    const arr = Array.from(next)
+                    setFilters(f => ({ ...f, pon_port_ids: arr.length ? arr : undefined, page: 1 }))
+                    return next
+                  })
+                }} />
             ))}
           </FilterCell>
 
-          <FilterCell label="Zona" value="Qualquer"
-            open={zoneOpen} onToggle={() => setZoneOpen(v => !v)} dropRef={zoneRef}>
-            <Opt label="Qualquer" onClick={() => setZoneOpen(false)} />
+          {/* ── Zona multi-select ── */}
+          <FilterCell
+            label="Zona"
+            value={multiLabel(zoneSet, zoneOptions.map(z => ({ id: z.id, name: z.name })), 'zonas')}
+            open={zoneOpen} onToggle={() => setZoneOpen(v => !v)} dropRef={zoneRef}
+          >
+            <CheckOpt label="Qualquer (limpar)" checked={zoneSet.size === 0}
+              onClick={() => { setZoneSet(new Set()); setFilters(f => ({ ...f, zone_ids: undefined, page: 1 })) }} />
+            {zoneOptions.map(z => (
+              <CheckOpt key={z.id} label={z.name} checked={zoneSet.has(z.id)}
+                onClick={() => {
+                  setZoneSet(prev => {
+                    const next = new Set(prev)
+                    next.has(z.id) ? next.delete(z.id) : next.add(z.id)
+                    const arr = Array.from(next)
+                    setFilters(f => ({ ...f, zone_ids: arr.length ? arr : undefined, page: 1 }))
+                    return next
+                  })
+                }} />
+            ))}
           </FilterCell>
 
           <FilterCell label="ODB" value="Qualquer"
@@ -373,10 +525,7 @@ export default function OnusConfiguredPage() {
             <Opt label="Qualquer" onClick={() => setVlanOpen(false)} />
           </FilterCell>
 
-          <FilterCell label="Tipo ONU" value="Qualquer"
-            open={onuTypeOpen} onToggle={() => setOnuTypeOpen(v => !v)} dropRef={onuTypeRef}>
-            <Opt label="Qualquer" onClick={() => setOnuTypeOpen(false)} />
-          </FilterCell>
+          {/* Tipo ONU filter removido */}
 
           <FilterCell label="Perfil" value="Qualquer"
             open={profileOpen} onToggle={() => setProfileOpen(v => !v)} dropRef={profileRef}>
@@ -399,8 +548,8 @@ export default function OnusConfiguredPage() {
                 { key: 'offline'        as StatusIconKey, Icon: WifiOff, title: 'Offline'            },
                 { key: 'admin_disabled' as StatusIconKey, Icon: Ban,     title: 'Admin desabilitado' },
               ]).map(({ key, Icon, title }) => (
-                <IconBtn key={key} pressed={statusIcon === key} title={title}
-                  onClick={() => applyStatus(statusIcon === key ? null : key)}>
+                <IconBtn key={key} pressed={statusSet.has(key)} title={title}
+                  onClick={() => toggleStatus(key)}>
                   <Icon className="h-3.5 w-3.5" />
                 </IconBtn>
               ))}
@@ -416,24 +565,33 @@ export default function OnusConfiguredPage() {
                 { key: 'warning'  as const, color: '#f59e0b', title: 'Atenção (-24 a -27 dBm)'  },
                 { key: 'critical' as const, color: '#ef4444', title: 'Crítico (< -27 dBm)'      },
               ]).map(s => (
-                <IconBtn key={s.key} pressed={signalLevel === s.key} title={s.title}
-                  onClick={() => setSignalLevel(p => p === s.key ? null : s.key)}>
+                <IconBtn key={s.key} pressed={signalSet.has(s.key)} title={s.title}
+                  onClick={() => setSignalSet(prev => {
+                    const next = new Set(prev)
+                    if (next.has(s.key)) next.delete(s.key); else next.add(s.key)
+                    const arr = Array.from(next)
+                    setFilters(f => ({ ...f, page: 1, signal_levels: arr.length ? arr as any : undefined }))
+                    return next
+                  })}>
                   <SignalBars color={s.color} />
                 </IconBtn>
               ))}
             </div>
           </div>
 
-          {/* Bridge / Router */}
-          <div className="flex-1 min-w-0 flex items-center gap-1.5">
-            <IconBtn pressed={brMode === 'bridge'} title="Bridge"
-              onClick={() => setBrMode(p => p === 'bridge' ? null : 'bridge')}>
-              <span className="text-[11px] font-bold">B</span>
-            </IconBtn>
-            <IconBtn pressed={brMode === 'router'} title="Router"
-              onClick={() => setBrMode(p => p === 'router' ? null : 'router')}>
-              <span className="text-[11px] font-bold">R</span>
-            </IconBtn>
+          {/* Bridge / Router — Em breve (sem coluna no banco) */}
+          <div className="flex-1 min-w-0 flex items-center gap-1.5" title="B/R">
+            <span className="text-xs font-bold whitespace-nowrap shrink-0">B/R</span>
+            <div className="flex items-center gap-1">
+              <button type="button"
+                className="h-8 w-8 inline-flex items-center justify-center rounded-md border border-input bg-background">
+                <span className="text-[11px] font-bold">B</span>
+              </button>
+              <button type="button"
+                className="h-8 w-8 inline-flex items-center justify-center rounded-md border border-input bg-background">
+                <span className="text-[11px] font-bold">R</span>
+              </button>
+            </div>
           </div>
 
         </div>
@@ -494,14 +652,13 @@ export default function OnusConfiguredPage() {
         emptyText="Nenhuma ONU encontrada. Tente ajustar os filtros."
         page={filters.page ?? 1}
         pageSize={filters.page_size ?? 50}
-        total={data?.total}
+      total={data?.total}
         onPageChange={page => setFilters(f => ({ ...f, page }))}
-        onRowClick={row => router.push(`/onus/${row.id}`)}
-        headerRowClassName="bg-[hsl(var(--secondary))]"
+        headerRowClassName="bg-[hsl(var(--primary))]"
         headerCellClassName="!text-white"
         containerClassName="relative w-full overflow-auto border-0 rounded-none"
-        bodyClassName="bg-transparent [&_td:first-child]:rounded-l-lg [&_td:last-child]:rounded-r-lg divide-y-0"
-        rowClassName="odd:bg-muted/50 odd:hover:bg-muted/50 hover:bg-transparent border-none"
+        bodyClassName="bg-transparent divide-y-0"
+        rowClassName="odd:bg-[hsl(var(--secondary))]/20 odd:hover:bg-[hsl(var(--secondary))]/20 hover:bg-transparent border-none"
       />
     </div>
   )

@@ -20,18 +20,6 @@ src/features/<domain>/<feature>/
 Exemplo:
 
 features/
-  traffic/
-    get-pon-traffic-series/
-      repository.ts
-      service.ts
-      types.ts
-
-  uplink/
-    get-uplink-errors-series/
-      repository.ts
-      service.ts
-      types.ts
-
   olt/
     get-olt-health/
       repository.ts
@@ -94,8 +82,7 @@ execute<FeatureName>()
 
 Exemplo:
 
-executeGetPonTrafficSeries()
-executeGetUplinkErrorsSeries()
+// series-related services removidos
 
 ---
 
@@ -103,18 +90,7 @@ executeGetUplinkErrorsSeries()
 
 ## Séries temporais
 
-Retornam múltiplos pontos.
-
-Formato:
-
-Output = {
-  items: [...]
-}
-
-Exemplo:
-
-TrafficPonSeriesOutput
-UplinkErrorsSeriesOutput
+Padrão descontinuado no momento (feature de gráficos removida).
 
 ---
 
@@ -138,13 +114,7 @@ GetOltHealthOutput
 
 Telemetria é armazenada em tabelas específicas.
 
-Tabelas atuais:
-
-- onu_traffic_samples
-- uplink_samples
-- olt_health_samples
-
-Essas tabelas armazenam séries históricas coletadas da rede.
+Padrão descontinuado no momento (feature de gráficos removida).
 
 ---
 
@@ -163,4 +133,3 @@ Sempre:
 - usar types.ts
 - usar repository.ts
 - usar service.ts
-

@@ -9,21 +9,21 @@
 
 ---
 
-## 0. Autenticação
+## 0. Autenticação ✅ (Fechado) 
 
 | # | Feature | Rota | Status | O que testar |
-|---|---------|------|--------|-------------|
+|---|---------|------|--------|-------------| 
 | 0.1 | Login com credenciais válidas | `/login` | ✅ | Entra com `felipepriet0@hotmail.com` + senha correta → redireciona para `/dashboard` |
 | 0.2 | Login com credenciais inválidas | `/login` | ✅ | Email inexistente → mensagem "Invalid email or password." |
 | 0.3 | Login com campos vazios | `/login` | ✅ | Submeter form vazio → não envia request |
 | 0.4 | Show/hide senha | `/login` | ✅ | Clicar no olho → tipo do input muda de password para text |
 | 0.5 | Redirecionar se já logado | `/login` | ✅ | Acessar `/login` com token válido no localStorage → redireciona para `/dashboard` |
-| 0.6 | AuthGuard — rota protegida | `/dashboard` | ✅ | Acessar `/dashboard` sem token → redireciona para `/login` |
-| 0.7 | Logout | Sidebar | ⚠️ | Botão de logout existe no sidebar → limpa token e redireciona |
+| 0.6 | AuthGuard — rota protegida | `/dashboard` | ✅ | Acessar `/dashboard` sem token → redireciona para `/login` | 
+| 0.7 | Logout | Sidebar | ✅ | Botão de logout existe no sidebar → limpa token e redireciona |
 
 ---
 
-## 1. Dashboard
+## 1. Dashboard ✅
 
 | # | Feature | Rota | Status | O que testar |
 |---|---------|------|--------|-------------|
@@ -44,12 +44,12 @@
 
 ---
 
-## 2. ONUs — Tela: Lista de ONUs Configuradas
+## 2. ONUs — Tela: Lista de ONUs Configuradas 
 
-| # | Feature | Rota | Status | O que testar |
+| # | Feature | Rota | Status | O que testar | 
 |---|---------|------|--------|-------------|
-| 2.1 | Listagem de ONUs | `/onus` | ✅ | Tabela carrega com dados reais do banco |
-| 2.2 | Colunas da tabela | `/onus` | ✅ | Serial, status, location (OLT/Board/PON), model, signal dBm, admin state, last seen |
+| 2.1 | Listagem de ONUs | `/onus` | ✅ | Tabela carrega com dados reais do banco | ✅ 
+| 2.2 | Colunas da tabela | `/onus` | ✅ | Serial, status, location (OLT/Board/PON), model, signal dBm, admin state, last seen | 
 | 2.3 | Busca por serial | `/onus` | ✅ | Digitar serial + Enter → filtra tabela |
 | 2.4 | Botão Search | `/onus` | ✅ | Clicar no botão Search → aplica filtro |
 | 2.5 | Filtro por Status | `/onus` | ✅ | Clicar chips All/Online/Offline/Unconfigured/Configured → filtra |

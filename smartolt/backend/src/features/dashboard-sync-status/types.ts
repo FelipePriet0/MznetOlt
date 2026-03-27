@@ -12,4 +12,3 @@ export type DashboardSyncStatusOutput = {
   configured_sync: DashboardSyncItem | null
   unconfigured_sync: DashboardSyncItem | null
 }
-

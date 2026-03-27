@@ -12,8 +12,8 @@ export async function listUnconfiguredOnusRepository(
   let query = supabase
     .from('onus')
     .select(
-      'id, serial_number, olt_id, board_id, pon_port_id, status, admin_state, last_known_signal, last_seen_at, created_at, olts(name), boards(name), pon_ports(name)',
-      { count: 'exact' }
+      'id, serial_number, olt_id, board_id, pon_port_id, pon_type, status, admin_state, last_known_signal, last_seen_at, created_at, olts(name), boards(name), pon_ports(name)',
+      { count: 'estimated' }
     )
     .eq('admin_state', 'unconfigured')
     .order('created_at', { ascending: false })
@@ -37,6 +37,10 @@ export async function listUnconfiguredOnusRepository(
     board_name: row.boards.name,
     pon_port_id: row.pon_port_id,
     pon_port_name: row.pon_ports.name,
+    pon_port_description: null,
+    pon_type: row.pon_type ?? null,
+    onu_vendor: null,
+    onu_model: null,
     status: row.status,
     admin_state: row.admin_state,
     last_known_signal: row.last_known_signal,
@@ -46,3 +50,4 @@ export async function listUnconfiguredOnusRepository(
 
   return { data: items, total: count ?? 0 }
 }
+

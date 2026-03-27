@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useAuth } from '@/hooks/use-auth'
@@ -8,14 +8,23 @@ import { ApiError } from '@/lib/api/client'
 import { Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
-  const router    = useRouter()
-  const { login } = useAuth()
+  const router              = useRouter()
+  const { login, user, isLoading } = useAuth()
 
+  // Hooks must run in the same order every render
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace('/dashboard')
+    }
+  }, [user, isLoading, router])
+
+  if (isLoading) return null
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -50,6 +59,7 @@ export default function LoginPage() {
               width={120}
               height={120}
               className="object-contain"
+              style={{ width: 'auto', height: 'auto' }}
               priority
             />
           </div>
@@ -191,6 +201,7 @@ export default function LoginPage() {
                 width={220}
                 height={220}
                 className="object-contain"
+                style={{ width: 'auto', height: 'auto' }}
                 priority
               />
             </div>

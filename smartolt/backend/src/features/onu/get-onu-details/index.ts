@@ -1,3 +1,3 @@
-export { getOnuDetailsService, OnuNotFoundError } from './service'
+export { getOnuDetailsService } from './service'
 export { canGetOnuDetails } from './permissions'
-export type { GetOnuDetailsInput, GetOnuDetailsOutput } from './types'
+export type { GetOnuDetailsInput, OnuDetailsOutput } from './types'

@@ -7,6 +7,10 @@ export type UnconfiguredOnuItem = {
   board_name: string
   pon_port_id: number
   pon_port_name: string
+  pon_port_description: string | null
+  pon_type: string | null
+  onu_vendor?: string | null
+  onu_model?: string | null
   status: string
   admin_state: string
   last_known_signal: number | null
@@ -19,8 +23,8 @@ export type ListUnconfiguredOnusInput = {
   board_id?: number
   pon_port_id?: number
   serial_number?: string
-  page?: number
-  page_size?: number
+  page: number
+  page_size: number
 }
 
 export type ListUnconfiguredOnusOutput = {
@@ -36,6 +40,7 @@ export type UnconfiguredOnuRow = {
   olt_id: number
   board_id: number
   pon_port_id: number
+  pon_type: string | null
   status: string
   admin_state: string
   last_known_signal: number | null
@@ -45,3 +50,4 @@ export type UnconfiguredOnuRow = {
   boards: { name: string }
   pon_ports: { name: string }
 }
+

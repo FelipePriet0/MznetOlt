@@ -14,7 +14,7 @@ import { Label }    from '@/components/ui/label'
 import { Badge }    from '@/components/ui/badge'
 import { cn }       from '@/lib/utils'
 import {
-  ShieldCheck, RefreshCw, Star, CheckCircle2,
+  ShieldCheck, Star, CheckCircle2,
   XCircle, Zap, AlertTriangle, Search, X,
 } from 'lucide-react'
 
@@ -264,10 +264,7 @@ export default function AuthorizationPage() {
             </p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={refetch}>
-          <RefreshCw className="h-3.5 w-3.5" />
-          Refresh
-        </Button>
+        {/* Removed manual refresh CTA */}
       </div>
 
       {/* Default preset banner */}

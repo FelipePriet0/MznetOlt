@@ -42,7 +42,10 @@ export const authorizationApi = {
     if (filters.is_default !== undefined) q.set('is_default', String(filters.is_default))
     if (filters.search)    q.set('search',    filters.search)
     if (filters.page)      q.set('page',      String(filters.page))
-    if (filters.page_size) q.set('page_size', String(filters.page_size))
+    if (filters.page_size) {
+      const size = Math.min(Math.max(filters.page_size, 1), 100)
+      q.set('page_size', String(size))
+    }
     const qs = q.toString()
     return apiFetch<AuthorizationPresetsResponse>(
       `/api/authorization/presets${qs ? `?${qs}` : ''}`

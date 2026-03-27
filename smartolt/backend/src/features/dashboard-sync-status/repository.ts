@@ -22,6 +22,5 @@ export async function fetchDashboardSyncStatusRepository(): Promise<DashboardSyn
     fetchLastByJob('configured_onus'),
     fetchLastByJob('unconfigured_onus'),
   ])
-
   return { configured_sync, unconfigured_sync }
 }

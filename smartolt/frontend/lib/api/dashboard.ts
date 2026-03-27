@@ -42,6 +42,7 @@ export type DashboardSyncStatus = {
   unconfigured_sync: DashboardSyncItem | null
 }
 
+
 export const dashboardApi = {
   summary: () =>
     apiFetch<DashboardSummary>('/api/dashboard/summary'),
@@ -59,4 +60,6 @@ export const dashboardApi = {
 
   syncStatus: () =>
     apiFetch<DashboardSyncStatus>('/api/dashboard/sync-status'),
+
+  // graphs removed
 }

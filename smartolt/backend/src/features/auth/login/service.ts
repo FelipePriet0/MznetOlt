@@ -1,4 +1,4 @@
-import { supabase } from '@/shared/lib/supabase'
+import { supabaseAuth } from '@/shared/lib/supabase'
 import { findUserByEmail } from './repository'
 import { validateLoginInput } from './validator'
 import type { LoginInput, LoginOutput } from './types'
@@ -21,7 +21,7 @@ export async function loginService(input: LoginInput): Promise<LoginOutput> {
   validateLoginInput(input)
 
   // 1. Validate email + password against Supabase Auth
-  const { error: authError } = await supabase.auth.signInWithPassword({
+  const { error: authError } = await supabaseAuth.auth.signInWithPassword({
     email:    input.email,
     password: input.password,
   })

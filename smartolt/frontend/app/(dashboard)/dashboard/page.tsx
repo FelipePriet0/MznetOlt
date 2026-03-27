@@ -13,10 +13,21 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import {
   Wifi, WifiOff, Clock,
-  ShieldCheck, AlertTriangle, Activity, RefreshCw, MoreHorizontal,
+  ShieldCheck, AlertTriangle, Activity, ChevronDown, X,
 } from 'lucide-react'
 
-type TimeScale = 'hour' | 'day' | 'week' | 'month' | 'year'
+// Mapeamento de ID da OLT → foto canônica
+// Adicione os arquivos em /public/olt-images/olt-{id}.jpg para exibir a foto real
+const OLT_PHOTO_MAP: Record<number, number> = {
+  10: 9, 11: 9,       // mesmo modelo que ID 9
+  21: 5, 24: 5, 25: 5, // mesmo modelo que ID 5
+}
+function oltPhotoSrc(id: number): string {
+  const canonical = OLT_PHOTO_MAP[id] ?? id
+  return `/olt-images/olt-${canonical}.png`
+}
+
+// Graph scales removed
 
 function StatCard({
   label, value, secondary, icon: Icon, accent, onClick, bg, bright,
@@ -116,70 +127,24 @@ function EventRow({ event }: { event: DashboardRecentEvent }) {
   )
 }
 
-function Dropdown({ label, items, onSelect }: { label: string; items: { key: string; label: string }[]; onSelect: (key: string) => void }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div className="relative">
-      <Button variant="outline" size="sm" onClick={() => setOpen(v => !v)}>
-        {label}
-        <MoreHorizontal className="h-3.5 w-3.5" />
-      </Button>
-      {open && (
-        <div className="absolute right-0 mt-2 w-40 rounded-md border bg-popover p-1 shadow-md z-20">
-          {items.map(item => (
-            <button
-              key={item.key}
-              className="w-full text-left px-3 py-2 text-sm rounded hover:bg-muted"
-              onClick={() => { onSelect(item.key); setOpen(false) }}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
+// Dropdown removed (graphs)
 
-function SimpleAreaChart({ series, height = 160 }: { series: { name: string; color: string; values: number[] }[]; height?: number }) {
-  const max = Math.max(1, ...series.flatMap(s => s.values))
-  const points = (values: number[]) => values.map((v, i) => `${(i/(values.length-1))*100},${100 - (v/max)*100}`).join(' ')
-  return (
-    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full" style={{ height }}>
-      {series.map((s, idx) => (
-        <g key={s.name} opacity={0.6 - idx*0.1}>
-          <polyline fill="none" stroke={s.color} strokeWidth={1.5} points={points(s.values)} />
-        </g>
-      ))}
-    </svg>
-  )
-}
+// StackedAreaChart removed (graphs)
 
-function SimpleBarChart({ data, height = 160, color = 'hsl(var(--primary))' }: { data: { label: string; value: number }[]; height?: number; color?: string }) {
-  const max = Math.max(1, ...data.map(d => d.value))
-  return (
-    <div className="flex items-end gap-1 w-full" style={{ height }}>
-      {data.map((d, i) => (
-        <div key={i} className="flex-1">
-          <div className="w-full rounded-t bg-primary" style={{ backgroundColor: color, height: `${(d.value/max)*100}%` }} />
-          <div className="mt-1 text-[10px] text-muted-foreground text-center truncate">{d.label}</div>
-        </div>
-      ))}
-    </div>
-  )
-}
+// SimpleBarChart removed (graphs)
 
 export default function DashboardPage() {
   const router = useRouter()
   const [selectedOlt, setSelectedOlt] = useState<number | null>(null)
-  const [scale, setScale] = useState<TimeScale>('day')
+  // scale removed (graphs)
   const [oltPopoverOpen, setOltPopoverOpen] = useState(false)
   const [oltSearch, setOltSearch] = useState('')
 
-  const summary = useApi(() => dashboardApi.summary())
-  const signal  = useApi(() => dashboardApi.signalStats())
-  const events  = useApi(() => dashboardApi.recentEvents(300))
-  const olts    = useApi(() => oltApi.list({ page_size: 1000 }))
+  const summary       = useApi(() => dashboardApi.summary())
+  const signal        = useApi(() => dashboardApi.signalStats())
+  const events        = useApi(() => dashboardApi.recentEvents(100))
+  const olts          = useApi(() => oltApi.list({ page_size: 1000 }))
+  // graphs removed: network status and auth-per-day
 
   // KPI counters (All or OLT specific)
   const [kpi, setKpi] = useState<Partial<{ waiting: number; online: number; offline: number; low: number }> | null>(null)
@@ -296,17 +261,8 @@ export default function DashboardPage() {
     return () => { abort = true }
   }, [selectedOlt, summary.data, summary.error, signal.data, signal.error])
 
-  // Authorizations per day from recent events fallback
-  const authPerDay = useMemo(() => {
-    const items = (events.data?.items ?? []).filter(ev => ev.event_type === 'onu_authorized' && (!selectedOlt || ev.olt_id === selectedOlt))
-    const map = new Map<string, number>()
-    for (const ev of items) {
-      const d = ev.created_at.slice(0, 10)
-      map.set(d, (map.get(d) ?? 0) + 1)
-    }
-    const sorted = Array.from(map.entries()).sort(([a],[b]) => a < b ? -1 : 1).slice(-30)
-    return sorted.map(([date, value]) => ({ label: date.slice(5), value }))
-  }, [events.data, selectedOlt])
+  // Authorizations per day from real bank data
+  // graphs removed
 
   function refetchAll() {
     summary.refetch(); signal.refetch(); events.refetch(); olts.refetch()
@@ -317,23 +273,8 @@ export default function DashboardPage() {
     return selectedOlt ? all.filter(e => e.olt_id === selectedOlt) : all
   }, [events.data, selectedOlt])
 
-  // Network status area chart placeholder data (uses KPIs as snapshot)
-  const areaSeries = useMemo(() => {
-    const len = 12
-    const base = kpi ? {
-      online: kpi.online,
-      powerFail: Math.round(kpi.offline * 0.4),
-      signalLoss: Math.max(0, kpi.offline - Math.round(kpi.offline * 0.4)),
-      na: Math.max(0, (kpi.waiting ?? 0)),
-    } : { online: 0, powerFail: 0, signalLoss: 0, na: 0 }
-    const mk = (v: number) => Array.from({ length: len }, (_, i) => Math.max(0, Math.round(v + Math.sin(i/2)*v*0.05)))
-    return [
-      { name: 'Online ONUs', color: 'hsl(var(--success))', values: mk(base.online) },
-      { name: 'Power fail',  color: 'hsl(var(--destructive))', values: mk(base.powerFail) },
-      { name: 'Signal loss', color: 'hsl(var(--warning))', values: mk(base.signalLoss) },
-      { name: 'N/A',         color: 'hsl(var(--muted-foreground))', values: mk(base.na) },
-    ]
-  }, [kpi, scale])
+  // Network status area chart from real bank data
+  // graphs removed
 
   const oltsList = (olts.data?.items ?? []).filter(o => o.name.toLowerCase().includes(oltSearch.toLowerCase()))
 
@@ -344,10 +285,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">SmartOLT-like operational overview</p>
         </div>
-        <Button variant="outline" size="sm" onClick={refetchAll}>
-          <RefreshCw className="h-3.5 w-3.5" />
-          Refresh
-        </Button>
+        {/* Removed manual refresh CTA */}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-12">
@@ -381,11 +319,6 @@ export default function DashboardPage() {
                         <StatCard
                           label="Waiting authorization"
                           value={display(w)}
-                          secondary={[
-                            { label: 'Denied', value: '—' },
-                            { label: 'Resync', value: '—' },
-                            { label: 'New ONU', value: '—' },
-                          ]}
                           icon={Clock}
                           accent="warning"
                           onClick={() => router.push('/onus/unconfigured')}
@@ -427,7 +360,7 @@ export default function DashboardPage() {
                           ]}
                           icon={AlertTriangle}
                           accent="primary"
-                          onClick={() => router.push('/diagnostics?signal=critical,warning')}
+                          onClick={() => router.push('/onus/configured?signal=warning,critical')}
                           bg="bg-[#F7A127]"
                           bright
                         />
@@ -442,42 +375,9 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Network status card */}
-          <div className="rounded-xl border bg-card p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-semibold">Network status</h2>
-              <Dropdown
-                label="More graphs"
-                items={[
-                  { key: 'hour',  label: 'Hourly graph' },
-                  { key: 'day',   label: 'Daily graph' },
-                  { key: 'week',  label: 'Weekly graph' },
-                  { key: 'month', label: 'Monthly graph' },
-                  { key: 'year',  label: 'Yearly graph' },
-                ]}
-                onSelect={k => setScale(k as TimeScale)}
-              />
-            </div>
-            <SimpleAreaChart series={areaSeries} />
-            <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'hsl(var(--success))' }} /> Online ONUs</span>
-              <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'hsl(var(--destructive))' }} /> Power fail</span>
-              <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'hsl(var(--warning))' }} /> Signal loss</span>
-              <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-muted-foreground" /> N/A</span>
-            </div>
-          </div>
+          {/* Graphs removed: Network status */}
 
-          {/* ONU authorizations per day */}
-          <div className="rounded-xl border bg-card p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-semibold">ONU authorizations per day</h2>
-            </div>
-            {events.loading ? (
-              <div className="h-40 w-full animate-pulse rounded bg-muted" />
-            ) : (
-              <SimpleBarChart data={authPerDay} />
-            )}
-          </div>
+          {/* Graphs removed: Authorizations per day */}
 
           {/* Activity feed */}
           <div className="rounded-xl border bg-card shadow-sm">
@@ -485,69 +385,202 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4 text-primary" />
                 <h2 className="text-sm font-semibold">Activity feed</h2>
+                <span className="text-xs text-muted-foreground ml-1">— eventos recentes de ONUs (autorização, online, offline)</span>
               </div>
-              <span className="text-xs text-muted-foreground">{filteredEvents.length} events</span>
+              <span className="text-xs text-muted-foreground">{filteredEvents.length} eventos</span>
             </div>
-            <div className="px-6">
+            <div className="px-6 max-h-72 overflow-y-auto">
               {events.loading ? (
                 Array.from({ length: 6 }).map((_, i) => <EventRowSkeleton key={i} />)
               ) : filteredEvents.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">No recent events.</p>
+                <p className="py-8 text-center text-sm text-muted-foreground">Nenhum evento recente.</p>
               ) : (
                 filteredEvents.map(ev => <EventRow key={ev.id} event={ev} />)
               )}
             </div>
           </div>
+
+          {/* Falhas em portas PON */}
+          {(() => {
+            const failures = filteredEvents.filter(ev =>
+              ev.event_type === 'onu_power_fail' || ev.event_type === 'onu_signal_loss'
+            )
+            const byOlt = new Map<number | null, typeof failures>()
+            for (const ev of failures) {
+              const arr = byOlt.get(ev.olt_id) ?? []
+              arr.push(ev)
+              byOlt.set(ev.olt_id, arr)
+            }
+            const rows = Array.from(byOlt.entries()).map(([olt_id, evs]) => {
+              const olt = (olts.data?.items ?? []).find((o: OltItem) => o.id === olt_id)
+              const powerFail   = evs.filter(e => e.event_type === 'onu_power_fail').length
+              const signalLoss  = evs.filter(e => e.event_type === 'onu_signal_loss').length
+              const cause = powerFail > signalLoss ? 'Falta de energia' : powerFail < signalLoss ? 'Perda de sinal' : 'Misto'
+              return { olt_id, oltName: olt?.name ?? `OLT #${olt_id}`, impacted: evs.length, powerFail, signalLoss, cause }
+            }).sort((a, b) => b.impacted - a.impacted)
+
+            return (
+              <div className="rounded-xl border bg-card shadow-sm">
+                <div className="flex items-center gap-2 border-b px-6 py-4">
+                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                  <h2 className="text-sm font-semibold">Falhas em portas PON</h2>
+                  <span className="text-xs text-muted-foreground ml-1">— últimas 24h</span>
+                </div>
+                {events.loading ? (
+                  <div className="px-6 py-4 space-y-2">
+                    {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-8 rounded bg-muted animate-pulse" />)}
+                  </div>
+                ) : rows.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma falha registrada.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b bg-muted/40 text-xs text-muted-foreground">
+                          <th className="px-4 py-2 text-left font-medium">OLT</th>
+                          <th className="px-4 py-2 text-right font-medium">ONUs impactadas</th>
+                          <th className="px-4 py-2 text-right font-medium">Power fail</th>
+                          <th className="px-4 py-2 text-right font-medium">Perda de sinal</th>
+                          <th className="px-4 py-2 text-left font-medium">Causa provável</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {rows.map(r => (
+                          <tr key={r.olt_id ?? 'null'} className="hover:bg-muted/30">
+                            <td className="px-4 py-2 font-medium truncate max-w-[120px]">{r.oltName}</td>
+                            <td className="px-4 py-2 text-right tabular-nums">{r.impacted}</td>
+                            <td className="px-4 py-2 text-right tabular-nums text-destructive">{r.powerFail}</td>
+                            <td className="px-4 py-2 text-right tabular-nums text-warning">{r.signalLoss}</td>
+                            <td className="px-4 py-2 text-muted-foreground">{r.cause}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
         </div>
 
         {/* OLT Panel */}
         <div className="lg:col-span-3 space-y-4">
-          <div className="rounded-xl border bg-card shadow-sm">
-            <div className="flex items-center justify-between border-b px-4 py-3">
-              <h2 className="text-sm font-semibold">OLTs</h2>
-              <div className="relative">
-                <Button variant="outline" size="sm" onClick={() => setOltPopoverOpen(v => !v)}>
-                  {selectedOlt ? `OLT #${selectedOlt}` : 'All'}
-                </Button>
-                {oltPopoverOpen && (
-                  <div className="absolute right-0 mt-2 w-72 rounded-md border bg-popover p-2 shadow-md z-30">
-                    <Input placeholder="Search OLT" value={oltSearch} onChange={e => setOltSearch(e.target.value)} className="h-8" />
-                    <div className="mt-2 max-h-64 overflow-auto">
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+
+            {selectedOlt ? (() => {
+              const olt = (olts.data?.items ?? []).find((o: OltItem) => o.id === selectedOlt)
+              return (
+                <>
+                  {/* Header com nome + dropdown para trocar */}
+                  <div className="flex items-center justify-between border-b px-4 py-3 gap-2">
+                    <div className="relative flex-1 min-w-0">
                       <button
-                        className="w-full text-left px-3 py-2 text-sm rounded hover:bg-muted flex items-center justify-between"
-                        onClick={() => { setSelectedOlt(null); setOltPopoverOpen(false) }}
+                        type="button"
+                        className="w-full flex items-center gap-1.5 text-left"
+                        onClick={() => setOltPopoverOpen(v => !v)}
                       >
-                        All
+                        <span className="text-sm font-semibold truncate">{olt?.name ?? `OLT #${selectedOlt}`}</span>
+                        <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                       </button>
-                      {oltsList.map(o => (
-                        <button
-                          key={o.id}
-                          className="w-full text-left px-3 py-2 text-sm rounded hover:bg-muted flex items-center justify-between"
-                          onClick={() => { setSelectedOlt(o.id); setOltPopoverOpen(false) }}
-                        >
-                          <span className="truncate">[{o.id}] {o.name}</span>
-                        </button>
-                      ))}
+                      {oltPopoverOpen && (
+                        <div className="absolute left-0 mt-2 w-72 rounded-md border bg-popover p-2 shadow-md z-30">
+                          <Input placeholder="Buscar OLT…" value={oltSearch} onChange={e => setOltSearch(e.target.value)} className="h-8" />
+                          <div className="mt-2 max-h-64 overflow-auto">
+                            <button className="w-full text-left px-3 py-2 text-sm rounded hover:bg-muted"
+                              onClick={() => { setSelectedOlt(null); setOltPopoverOpen(false) }}>
+                              Todas as OLTs
+                            </button>
+                            {oltsList.map((o: OltItem) => (
+                              <button key={o.id}
+                                className="w-full text-left px-3 py-2 text-sm rounded hover:bg-muted"
+                                onClick={() => { setSelectedOlt(o.id); setOltPopoverOpen(false) }}>
+                                [{o.id}] {o.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
+                    <button type="button" onClick={() => setSelectedOlt(null)}
+                      className="shrink-0 rounded-md p-1 hover:bg-muted text-muted-foreground" title="Ver todas">
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
-                )}
-              </div>
-            </div>
-            <div className="p-4 space-y-3">
-              {(olts.data?.items ?? []).map((o: OltItem) => (
-                <div key={o.id} className="flex items-center justify-between rounded-lg border p-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{o.name}</p>
-                    <p className="text-xs text-muted-foreground">ID {o.id}</p>
+
+                  {/* Foto da OLT */}
+                  <div className="relative w-full aspect-[4/3] bg-muted">
+                    {/* Placeholder (fica atrás, z-0) */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted gap-2 z-0">
+                      <svg className="h-12 w-12 text-muted-foreground/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2}>
+                        <rect x="2" y="3" width="20" height="5" rx="1"/>
+                        <rect x="2" y="10" width="20" height="5" rx="1"/>
+                        <rect x="2" y="17" width="20" height="5" rx="1"/>
+                        <circle cx="19" cy="5.5" r="0.8" fill="currentColor"/>
+                        <circle cx="19" cy="12.5" r="0.8" fill="currentColor"/>
+                        <circle cx="19" cy="19.5" r="0.8" fill="currentColor"/>
+                      </svg>
+                      <span className="text-xs text-muted-foreground text-center">Sem foto disponível</span>
+                    </div>
+                    {/* Foto (fica na frente, z-10) */}
+                    <img
+                      src={oltPhotoSrc(selectedOlt)}
+                      alt={olt?.name ?? `OLT ${selectedOlt}`}
+                      className="absolute inset-0 w-full h-full object-cover z-10"
+                      onError={(e) => { e.currentTarget.style.display = 'none' }}
+                    />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">ONU: —</Badge>
-                    <Badge variant="secondary">Temp: —</Badge>
+
+                  {/* Info abaixo da foto */}
+                  <div className="px-4 py-3 space-y-1">
+                    <p className="text-xs text-muted-foreground">OLT selecionada</p>
+                    <p className="text-sm font-medium">{olt?.name ?? `#${selectedOlt}`}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Uptime: <span className="text-foreground font-medium">N/A</span>
+                    </p>
+                  </div>
+                </>
+              )
+            })() : (
+              <>
+                {/* Lista de OLTs (padrão) */}
+                <div className="flex items-center justify-between border-b px-4 py-3">
+                  <h2 className="text-sm font-semibold">OLTs</h2>
+                  <div className="relative">
+                    <Button variant="outline" size="sm" onClick={() => setOltPopoverOpen(v => !v)}>
+                      Todas <ChevronDown className="h-3.5 w-3.5 ml-1" />
+                    </Button>
+                    {oltPopoverOpen && (
+                      <div className="absolute right-0 mt-2 w-72 rounded-md border bg-popover p-2 shadow-md z-30">
+                        <Input placeholder="Buscar OLT…" value={oltSearch} onChange={e => setOltSearch(e.target.value)} className="h-8" />
+                        <div className="mt-2 max-h-64 overflow-auto">
+                          {oltsList.map((o: OltItem) => (
+                            <button key={o.id}
+                              className="w-full text-left px-3 py-2 text-sm rounded hover:bg-muted"
+                              onClick={() => { setSelectedOlt(o.id); setOltPopoverOpen(false) }}>
+                              [{o.id}] {o.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))}
-              {olts.loading && <p className="text-xs text-muted-foreground">Loading OLTs…</p>}
-            </div>
+                <div className="p-4 space-y-2">
+                  {(olts.data?.items ?? []).map((o: OltItem) => (
+                    <button key={o.id} type="button"
+                      className="w-full text-left flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50 transition-colors"
+                      onClick={() => setSelectedOlt(o.id)}>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{o.name}</p>
+                        <p className="text-xs text-muted-foreground">ID {o.id}</p>
+                      </div>
+                      <Badge variant="secondary" className="shrink-0">ONU: —</Badge>
+                    </button>
+                  ))}
+                  {olts.loading && <p className="text-xs text-muted-foreground">Carregando OLTs…</p>}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

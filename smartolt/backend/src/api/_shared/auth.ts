@@ -27,6 +27,7 @@ function verify(token: string): AuthenticatedUser | null {
     if (!timingSafeEqual(sigBuf, expectedBuf)) return null
     const payload = JSON.parse(Buffer.from(body, 'base64url').toString())
     if (!payload.user_id || !payload.role_id || !payload.role_code) return null
+    if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp) return null
     return {
       user_id: payload.user_id,
       role_id: payload.role_id,
@@ -37,12 +38,16 @@ function verify(token: string): AuthenticatedUser | null {
   }
 }
 
+const TOKEN_TTL_SECONDS = 24 * 60 * 60 // 24 h
+
 export function createToken(user: AuthenticatedUser): string {
+  const now = Math.floor(Date.now() / 1000)
   return sign({
     user_id: user.user_id,
     role_id: user.role_id,
     role_code: user.role_code,
-    iat: Math.floor(Date.now() / 1000),
+    iat: now,
+    exp: now + TOKEN_TTL_SECONDS,
   })
 }
 

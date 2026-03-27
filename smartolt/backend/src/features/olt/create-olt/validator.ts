@@ -26,9 +26,13 @@ export async function validateCreateOlt(input: CreateOltInput): Promise<void> {
   const duplicate = await existsOltByMgmtIp(input.mgmt_ip)
   if (duplicate) throw new DuplicateMgmtIpError()
 
-  const hasLocation = await existsLocationById(input.location_id)
-  if (!hasLocation) throw new LocationNotFoundError()
+  if (input.location_id != null) {
+    const hasLocation = await existsLocationById(input.location_id)
+    if (!hasLocation) throw new LocationNotFoundError()
+  }
 
-  const hasZone = await existsZoneById(input.zone_id)
-  if (!hasZone) throw new ZoneNotFoundError()
+  if (input.zone_id != null) {
+    const hasZone = await existsZoneById(input.zone_id)
+    if (!hasZone) throw new ZoneNotFoundError()
+  }
 }

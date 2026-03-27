@@ -9,10 +9,10 @@ import {
   Shield,
   Settings,
   FileText,
-  Zap,
   Menu,
   X,
   LogOut,
+  BellDot,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
@@ -45,21 +45,12 @@ const navItems: NavItem[] = [
     icon: <Wifi className="w-5 h-5" />,
   },
   {
-    label: 'Authorization',
-    href: '/authorization',
-    icon: <Shield className="w-5 h-5" />,
+    label: 'Tickets',
+    href: '/tickets',
+    icon: <BellDot className="w-5 h-5" />,
   },
   {
-    label: 'Reports',
-    href: '/reports',
-    icon: <FileText className="w-5 h-5" />,
-  },
-  {
-    label: 'Diagnostics',
-    href: '/diagnostics',
-    icon: <Zap className="w-5 h-5" />,
-  },
-  {
+    // Authorization removida do menu; agora inline na página de Não configuradas
     label: 'Settings',
     href: '/settings',
     icon: <Settings className="w-5 h-5" />,
@@ -141,13 +132,21 @@ export function Sidebar() {
             {/* User info */}
             {user && (
               <div className="flex items-center gap-2.5 px-1">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-secondary-foreground text-xs font-bold shrink-0">
-                  {user.name?.charAt(0).toUpperCase() ?? 'U'}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium truncate">{user.name}</p>
-                  <p className="text-[10px] text-white/80 truncate capitalize">{user.role_code}</p>
-                </div>
+                {(() => {
+                  const letter = (user.name?.trim()?.[0] || user.email?.trim()?.[0] || user.role_code?.trim()?.[0] || 'U').toUpperCase()
+                  const displayName = user.name?.trim() || user.email || user.role_code
+                  return (
+                    <>
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-secondary-foreground text-xs font-bold shrink-0">
+                        {letter}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium truncate">{displayName}</p>
+                        <p className="text-[10px] text-white/80 truncate capitalize">{user.role_code}</p>
+                      </div>
+                    </>
+                  )
+                })()}
               </div>
             )}
 

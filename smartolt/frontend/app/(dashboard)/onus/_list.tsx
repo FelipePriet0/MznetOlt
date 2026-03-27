@@ -10,7 +10,7 @@ import { Button }  from '@/components/ui/button'
 import { Input }   from '@/components/ui/input'
 import { Badge }   from '@/components/ui/badge'
 import { cn }      from '@/lib/utils'
-import { Search, SlidersHorizontal, RefreshCw, Smartphone, Signal, X, Wifi, WifiOff, PlugZap, Ban } from 'lucide-react'
+import { Search, SlidersHorizontal, Smartphone, Signal, X, Wifi, WifiOff, PlugZap, Ban } from 'lucide-react'
 
 function SignalChip({ dbm }: { dbm: number | null }) {
   if (dbm === null) return <span className="text-xs text-muted-foreground">—</span>
@@ -142,10 +142,6 @@ export function OnuList({ fixedStatus }: { fixedStatus?: 'unconfigured' | 'confi
             <p className="text-sm text-muted-foreground">{data ? `${data.total} devices found` : 'Loading…'}</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={refetch}>
-          <RefreshCw className="h-3.5 w-3.5" />
-          Refresh
-        </Button>
       </div>
 
       <div className="flex flex-col gap-3">
