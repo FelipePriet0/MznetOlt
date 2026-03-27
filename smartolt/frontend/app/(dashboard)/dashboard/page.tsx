@@ -326,7 +326,7 @@ export default function DashboardPage() {
           <div className="space-y-2">
             {Object.values(kpiErrors).some(Boolean) && (
               <div className="rounded-md border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-warning">
-                Some metrics couldn't update. Showing latest available data.
+                Some metrics couldn&apos;t update. Showing latest available data.
               </div>
             )}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
