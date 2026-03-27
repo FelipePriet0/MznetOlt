@@ -1,5 +1,6 @@
 export type DashboardOnuAuthPerDayInput = {
   days?: number
+  olt_id?: number
 }
 
 export type DashboardOnuAuthPerDayItem = {
@@ -10,4 +11,3 @@ export type DashboardOnuAuthPerDayItem = {
 export type DashboardOnuAuthPerDayOutput = {
   items: DashboardOnuAuthPerDayItem[]
 }
-

@@ -16,7 +16,7 @@ export async function dashboardOnuAuthPerDayService(
   const start = new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
   const startIso = start.toISOString()
 
-  const items = await fetchOnuAuthPerDayRepository(startIso)
+  const items = await fetchOnuAuthPerDayRepository(startIso, input.olt_id)
 
   return { items }
 }

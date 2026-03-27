@@ -18,37 +18,25 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user,      setUser]      = useState<AuthUser | null>(null)
-  const [token,     setToken]     = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  // Bootstrap from localStorage synchronamente no primeiro render
+  const initialToken = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null
+  const initialUser  = typeof window !== 'undefined' ? (() => { try { return JSON.parse(localStorage.getItem(USER_KEY) || 'null') } catch { return null } })() : null
+  const [user,      setUser]      = useState<AuthUser | null>(initialUser)
+  const [token,     setToken]     = useState<string | null>(initialToken)
+  const [isLoading, setIsLoading] = useState<boolean>(!!initialToken && !initialUser)
 
-  // Bootstrap: restore session from localStorage immediately, then refresh in background
+  // Refresh em background quando há token
   useEffect(() => {
-    const storedToken = localStorage.getItem(TOKEN_KEY)
-    if (!storedToken) { setIsLoading(false); return }
-
-    // Restore cached user instantly so AuthGuard never redirects on F5
-    const storedUser = localStorage.getItem(USER_KEY)
-    if (storedUser) {
-      try { setUser(JSON.parse(storedUser)) } catch {}
-    }
-    setToken(storedToken)
-    setIsLoading(false)
-
-    // Silently refresh user data in background; only logout on explicit 401/403
+    if (!token) { setIsLoading(false); return }
     authApi.me()
       .then(me => { setUser(me); localStorage.setItem(USER_KEY, JSON.stringify(me)) })
-      .catch((err: unknown) => {
-        const status = (err as ApiError)?.status ?? null
-        if (status === 401 || status === 403) {
-          localStorage.removeItem(TOKEN_KEY)
-          localStorage.removeItem(USER_KEY)
-          setToken(null)
-          setUser(null)
-        }
-        // Any other error (network, 500): keep the session alive
+      .catch((_err: unknown) => {
+        // Não limpe a sessão automaticamente, mesmo em 401/403.
+        // Em dev, preferimos manter o token até logout explícito.
       })
-  }, [])
+      .finally(() => setIsLoading(false))
+  // run when token changes (e.g., after login)
+  }, [token])
 
   const login = useCallback(async (email: string, password: string) => {
     const { token: newToken, user: newUser } = await authApi.login(email, password)

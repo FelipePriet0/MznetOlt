@@ -7,6 +7,9 @@ import { dashboardApi, type DashboardRecentEvent } from '@/lib/api/dashboard'
 import { onuApi } from '@/lib/api/onu'
 import { oltApi, type OltItem } from '@/lib/api/olt'
 import { StatCardSkeleton, EventRowSkeleton } from '@/components/shared/skeleton'
+import { SimpleBarChart, SimpleStackedArea } from '@/components/shared/charts'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -112,7 +115,7 @@ function EventRow({ event }: { event: DashboardRecentEvent }) {
   const Icon = cfg.icon
   const label = event.event_type.replace(/_/g, ' ')
   return (
-    <div className="flex items-center gap-3 py-3 border-b last:border-0">
+    <div className="flex items-center gap-3 py-2.5">
       <div className={cn('flex h-8 w-8 items-center justify-center rounded-full shrink-0', cfg.color)}>
         <Icon className="h-3.5 w-3.5" />
       </div>
@@ -144,6 +147,12 @@ export default function DashboardPage() {
   const signal        = useApi(() => dashboardApi.signalStats())
   const events        = useApi(() => dashboardApi.recentEvents(100))
   const olts          = useApi(() => oltApi.list({ page_size: 1000 }))
+  const [authDate, setAuthDate] = useState<Date | undefined>(new Date())
+  const [authCalOpen, setAuthCalOpen] = useState(false)
+  // Busca um range maior e filtramos localmente conforme a data escolhida
+  const authPerDay    = useApi(() => dashboardApi.authPerDay(selectedOlt ? { olt_id: selectedOlt, days: 365 } : { days: 365 }), [selectedOlt])
+  const [nsGran, setNsGran] = useState<'hour'|'day'|'week'|'month'|'year'>('day')
+  const netStatus     = useApi(() => dashboardApi.networkStatus({ granularity: nsGran, olt_id: selectedOlt ?? undefined }), [nsGran, selectedOlt])
   // graphs removed: network status and auth-per-day
 
   // KPI counters (All or OLT specific)
@@ -396,9 +405,108 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Graphs removed: Network status */}
+          {/* Network status (Stacked Area) */}
+          <div className="rounded-xl border bg-card shadow-sm">
+            <div className="flex items-center justify-between border-b px-6 py-4">
+              <div className="flex items-center gap-2">
+                <Activity className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold">Estado da rede</h2>
+              </div>
+              <div className="flex items-center gap-1 text-xs">
+                {(['hour','day','week','month','year'] as const).map(g => (
+                  <button key={g} className={cn('px-2 py-1 rounded-md border', nsGran === g ? 'bg-primary text-primary-foreground' : 'bg-background')}
+                    onClick={() => setNsGran(g)}>
+                    {g[0].toUpperCase() + g.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="p-4">
+              {netStatus.loading ? (
+                <div className="h-52 rounded bg-muted animate-pulse" />
+              ) : (netStatus.data?.items?.length ?? 0) === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">Sem amostras para o período selecionado.</p>
+              ) : (
+                <SimpleStackedArea
+                  data={(netStatus.data?.items ?? []).map(it => ({
+                    x: new Date(it.collected_at).toLocaleDateString('pt-BR', nsGran === 'hour' ? { day: '2-digit', month: '2-digit' } : { day: '2-digit', month: '2-digit' }),
+                    series: {
+                      online: it.online_onus,
+                      power_fail: it.power_fail,
+                      signal_loss: it.signal_loss,
+                      na: it.na,
+                    },
+                  }))}
+                  colors={{ online: 'rgba(34,197,94,0.7)', power_fail: 'rgba(239,68,68,0.6)', signal_loss: 'rgba(245,158,11,0.6)', na: 'rgba(107,114,128,0.5)' }}
+                />
+              )}
+            </div>
+          </div>
 
-          {/* Graphs removed: Authorizations per day */}
+          {/* Autorizações da ONU por dia (Bar) */}
+          <div className="rounded-xl border bg-card shadow-sm">
+            <div className="flex items-center justify-between border-b px-6 py-4">
+              <div className="flex items-center gap-2">
+                <Activity className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold">Autorizações da ONU por dia</h2>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">30 dia(s)</span>
+                  <Popover open={authCalOpen} onOpenChange={setAuthCalOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm">Selecionar data</Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="p-2">
+                      <Calendar
+                        mode="single"
+                        selected={authDate}
+                        onSelect={(d) => { setAuthDate(d); setAuthCalOpen(false) }}
+                        className="rounded-lg border"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </div>
+            <div className="p-4">
+              {authPerDay.loading ? (
+                <div className="h-40 rounded bg-muted animate-pulse" />
+              ) : (authPerDay.data?.items?.length ?? 0) === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">Sem autorizações neste período.</p>
+              ) : (
+                (() => {
+                  // Range de 30 dias terminando na data selecionada
+                  const end = authDate ? new Date(authDate.getFullYear(), authDate.getMonth(), authDate.getDate()) : new Date()
+                  const start = new Date(end)
+                  start.setDate(end.getDate() - 29)
+                  const byKey = new Map<string, number>()
+                  for (const it of authPerDay.data?.items ?? []) {
+                    const d = new Date(it.date)
+                    const dn = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+                    if (dn >= start && dn <= end) {
+                      const key = dn.toISOString().slice(0,10)
+                      byKey.set(key, it.total_authorizations)
+                    }
+                  }
+                  const bars: { label: string; value: number }[] = []
+                  for (let i = 0; i < 30; i++) {
+                    const d = new Date(start)
+                    d.setDate(start.getDate() + i)
+                    const key = d.toISOString().slice(0,10)
+                    const value = byKey.get(key) ?? 0
+                    bars.push({ label: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }), value })
+                  }
+                  return (
+                    <SimpleBarChart
+                      data={bars}
+                      yStep={20}
+                    />
+                  )
+                })()
+              )}
+            </div>
+          </div>
 
           {/* Activity feed */}
           <div className="rounded-xl border bg-card shadow-sm">
@@ -410,78 +518,39 @@ export default function DashboardPage() {
               </div>
               <span className="text-xs text-muted-foreground">{filteredEvents.length} eventos</span>
             </div>
-            <div className="px-6 max-h-72 overflow-y-auto">
+            <div className="relative w-full overflow-auto px-6">
               {events.loading ? (
-                Array.from({ length: 6 }).map((_, i) => <EventRowSkeleton key={i} />)
+                <div className="py-4 space-y-2">
+                  {Array.from({ length: 6 }).map((_, i) => <EventRowSkeleton key={i} />)}
+                </div>
               ) : filteredEvents.length === 0 ? (
                 <p className="py-8 text-center text-sm text-muted-foreground">Nenhum evento recente.</p>
               ) : (
-                filteredEvents.map(ev => <EventRow key={ev.id} event={ev} />)
+                <table className="w-full text-sm">
+                  <thead className="bg-transparent">
+                    <tr className="hover:bg-transparent">
+                      <th className="text-left font-medium text-xs text-muted-foreground py-2.5">Evento</th>
+                      <th className="text-right font-medium text-xs text-muted-foreground py-2.5">Quando</th>
+                    </tr>
+                  </thead>
+                  <tbody className="table-row h-2" aria-hidden="true"></tbody>
+                  <tbody className="[&_td:first-child]:rounded-l-lg [&_td:last-child]:rounded-r-lg">
+                    {filteredEvents.map((ev) => (
+                      <tr key={ev.id} className="odd:bg-muted/50 odd:hover:bg-muted/50 border-none hover:bg-transparent">
+                        <td className="py-2.5">
+                          <EventRow event={ev} />
+                        </td>
+                        <td className="py-2.5 text-right text-xs text-muted-foreground whitespace-nowrap">{relativeTime(ev.created_at)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tbody className="table-row h-2" aria-hidden="true"></tbody>
+                </table>
               )}
             </div>
           </div>
 
-          {/* Falhas em portas PON */}
-          {(() => {
-            const failures = filteredEvents.filter(ev =>
-              ev.event_type === 'onu_power_fail' || ev.event_type === 'onu_signal_loss'
-            )
-            const byOlt = new Map<number | null, typeof failures>()
-            for (const ev of failures) {
-              const arr = byOlt.get(ev.olt_id) ?? []
-              arr.push(ev)
-              byOlt.set(ev.olt_id, arr)
-            }
-            const rows = Array.from(byOlt.entries()).map(([olt_id, evs]) => {
-              const olt = (olts.data?.items ?? []).find((o: OltItem) => o.id === olt_id)
-              const powerFail   = evs.filter(e => e.event_type === 'onu_power_fail').length
-              const signalLoss  = evs.filter(e => e.event_type === 'onu_signal_loss').length
-              const cause = powerFail > signalLoss ? 'Falta de energia' : powerFail < signalLoss ? 'Perda de sinal' : 'Misto'
-              return { olt_id, oltName: olt?.name ?? `OLT #${olt_id}`, impacted: evs.length, powerFail, signalLoss, cause }
-            }).sort((a, b) => b.impacted - a.impacted)
-
-            return (
-              <div className="rounded-xl border bg-card shadow-sm">
-                <div className="flex items-center gap-2 border-b px-6 py-4">
-                  <AlertTriangle className="h-4 w-4 text-destructive" />
-                  <h2 className="text-sm font-semibold">Falhas em portas PON</h2>
-                  <span className="text-xs text-muted-foreground ml-1">— últimas 24h</span>
-                </div>
-                {events.loading ? (
-                  <div className="px-6 py-4 space-y-2">
-                    {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-8 rounded bg-muted animate-pulse" />)}
-                  </div>
-                ) : rows.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma falha registrada.</p>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b bg-muted/40 text-xs text-muted-foreground">
-                          <th className="px-4 py-2 text-left font-medium">OLT</th>
-                          <th className="px-4 py-2 text-right font-medium">ONUs impactadas</th>
-                          <th className="px-4 py-2 text-right font-medium">Power fail</th>
-                          <th className="px-4 py-2 text-right font-medium">Perda de sinal</th>
-                          <th className="px-4 py-2 text-left font-medium">Causa provável</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y">
-                        {rows.map(r => (
-                          <tr key={r.olt_id ?? 'null'} className="hover:bg-muted/30">
-                            <td className="px-4 py-2 font-medium truncate max-w-[120px]">{r.oltName}</td>
-                            <td className="px-4 py-2 text-right tabular-nums">{r.impacted}</td>
-                            <td className="px-4 py-2 text-right tabular-nums text-destructive">{r.powerFail}</td>
-                            <td className="px-4 py-2 text-right tabular-nums text-warning">{r.signalLoss}</td>
-                            <td className="px-4 py-2 text-muted-foreground">{r.cause}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            )
-          })()}
+          {/* Falhas em portas PON — removido por solicitação */}
         </div>
 
         {/* OLT Panel */}

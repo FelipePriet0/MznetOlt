@@ -62,4 +62,23 @@ export const dashboardApi = {
     apiFetch<DashboardSyncStatus>('/api/dashboard/sync-status'),
 
   // graphs removed
+  authPerDay: (params?: { days?: number; olt_id?: number }) => {
+    const q = new URLSearchParams()
+    if (params?.days)   q.set('days',   String(params.days))
+    if (params?.olt_id) q.set('olt_id', String(params.olt_id))
+    const qs = q.toString()
+    return apiFetch<{ items: { date: string; total_authorizations: number }[] }>(
+      `/api/dashboard/onu-auth-per-day${qs ? `?${qs}` : ''}`
+    )
+  },
+
+  networkStatus: (params?: { granularity?: 'hour'|'day'|'week'|'month'|'year'; olt_id?: number }) => {
+    const q = new URLSearchParams()
+    if (params?.granularity) q.set('granularity', params.granularity)
+    if (params?.olt_id)      q.set('olt_id', String(params.olt_id))
+    const qs = q.toString()
+    return apiFetch<{ items: { collected_at: string; online_onus: number; power_fail: number; signal_loss: number; na: number; maximum: number }[] }>(
+      `/api/dashboard/network-status${qs ? `?${qs}` : ''}`
+    )
+  },
 }

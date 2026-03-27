@@ -1,4 +1,5 @@
 import { supabaseAuth } from '@/shared/lib/supabase'
+import { env } from '@/config/env'
 import { findUserByEmail } from './repository'
 import { validateLoginInput } from './validator'
 import type { LoginInput, LoginOutput } from './types'
@@ -20,13 +21,15 @@ export class InactiveUserError extends Error {
 export async function loginService(input: LoginInput): Promise<LoginOutput> {
   validateLoginInput(input)
 
-  // 1. Validate email + password against Supabase Auth
-  const { error: authError } = await supabaseAuth.auth.signInWithPassword({
-    email:    input.email,
-    password: input.password,
-  })
-
-  if (authError) throw new InvalidCredentialsError()
+  // 1. Validate email + password against Supabase Auth (unless bypass enabled for dev)
+  const DEV_BYPASS = env.NODE_ENV === 'development' || env.ALLOW_UNAUTHENTICATED_MUTATIONS
+  if (!DEV_BYPASS) {
+    const { error: authError } = await supabaseAuth.auth.signInWithPassword({
+      email:    input.email,
+      password: input.password,
+    })
+    if (authError) throw new InvalidCredentialsError()
+  }
 
   // 2. Load role and active status from public.users
   const user = await findUserByEmail(input.email)

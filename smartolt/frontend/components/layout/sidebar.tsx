@@ -86,11 +86,11 @@ export function Sidebar() {
       <aside
         className={`${
           isOpen ? 'w-64' : 'w-0'
-        } md:w-64 border-r transition-all duration-300 overflow-hidden md:overflow-visible bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] border-white`}
+        } md:w-64 transition-all duration-300 overflow-hidden md:overflow-visible bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))]`}
       >
         <div className="h-screen flex flex-col">
           {/* Logo/Header */}
-          <div className="p-6 border-b border-white">
+          <div className="p-6">
             <h1 className="text-xl font-bold tracking-tight">SmartOLT</h1>
             <p className="text-xs text-white mt-1">
               Network Management
@@ -113,8 +113,8 @@ export function Sidebar() {
                         transition-colors duration-200
                         ${
                           isActive
-                            ? 'bg-primary text-primary-foreground'
-                            : 'text-white/90 hover:bg-[hsl(var(--secondary))] hover:text-[hsl(var(--secondary-foreground))]'
+                            ? 'bg-black/40 text-white hover:bg-black/40'
+                            : 'text-white/90 hover:bg-black/40'
                         }
                       `}
                     >
@@ -128,7 +128,7 @@ export function Sidebar() {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-white space-y-3">
+          <div className="p-4 space-y-3">
             {/* User info */}
             {user && (
               <div className="flex items-center gap-2.5 px-1">
@@ -136,7 +136,7 @@ export function Sidebar() {
                   const letter = (user.name?.trim()?.[0] || user.email?.trim()?.[0] || user.role_code?.trim()?.[0] || 'U').toUpperCase()
                   const displayName = user.name?.trim() || user.email || user.role_code
                   return (
-                    <>
+                    <div className="flex w-full items-center gap-2">
                       <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-secondary-foreground text-xs font-bold shrink-0">
                         {letter}
                       </div>
@@ -144,20 +144,19 @@ export function Sidebar() {
                         <p className="text-xs font-medium truncate">{displayName}</p>
                         <p className="text-[10px] text-white/80 truncate capitalize">{user.role_code}</p>
                       </div>
-                    </>
+                      <button
+                        aria-label="Sign out"
+                        onClick={handleLogout}
+                        className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+                        title="Sign out"
+                      >
+                        <LogOut className="h-4 w-4 text-white" />
+                      </button>
+                    </div>
                   )
                 })()}
               </div>
             )}
-
-            {/* Logout button */}
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <LogOut className="h-4 w-4 shrink-0 text-white" />
-              Sign out
-            </button>
 
             {/* Version */}
             <div className="px-1 text-[10px] text-muted-foreground/60">

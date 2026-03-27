@@ -1,18 +1,23 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth()
+  const { user, token, isLoading } = useAuth() as any
   const router = useRouter()
+  const lsToken = useMemo(() => {
+    if (typeof window === 'undefined') return null
+    try { return localStorage.getItem('smartolt_token') } catch { return null }
+  }, [])
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    // Só redireciona se não estiver carregando E não houver usuário nem token (sem sessão mesmo)
+    if (!isLoading && !user && !token && !lsToken) {
       router.replace('/login')
     }
-  }, [user, isLoading, router])
+  }, [user, token, lsToken, isLoading, router])
 
   if (isLoading) {
     return (
@@ -25,7 +30,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (!user) return null
+  // Se há token mas ainda não carregou o user (por erro transitório), permite renderizar.
+  if (!user && (token || lsToken)) return <>{children}</>
 
   return <>{children}</>
 }

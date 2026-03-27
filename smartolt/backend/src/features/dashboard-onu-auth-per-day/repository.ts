@@ -6,14 +6,33 @@ type OnuAuthorizationRow = {
 }
 
 export async function fetchOnuAuthPerDayRepository(
-  start_iso: string
+  start_iso: string,
+  olt_id?: number
 ): Promise<DashboardOnuAuthPerDayItem[]> {
-  const { data, error } = await supabase
+  // When filtering by OLT, avoid relying on implicit FK joins (may be missing in some envs)
+  let onuFilterIds: number[] | undefined
+  if (olt_id !== undefined) {
+    const { data: onuRows, error: onuErr } = await supabase
+      .from('onus')
+      .select('id')
+      .eq('olt_id', olt_id)
+    if (onuErr) throw onuErr
+    onuFilterIds = (onuRows ?? []).map((r: any) => r.id)
+    if (!onuFilterIds.length) return []
+  }
+
+  let query = supabase
     .from('onu_authorizations')
     .select('created_at')
     .eq('status', 'success')
     .gte('created_at', start_iso)
     .order('created_at', { ascending: true })
+
+  if (onuFilterIds) {
+    query = query.in('onu_id', onuFilterIds as any)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     throw error

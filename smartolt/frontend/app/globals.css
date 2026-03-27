@@ -65,16 +65,15 @@
 
     --radius:                var(--brand-radius-md);
 
-    /* ── Sidebar Tokens (blue theme) ──────────────────── */
-    /* Using Tailwind-like blue scale: base ~ blue-500 */
-    --sidebar-background: 0 0% 0%;       /* black */
-    --sidebar-foreground: 210 40% 98%;   /* near-white for contrast */
-    --sidebar-primary:    217 91% 45%;   /* active item background (darker blue) */
+    /* ── Sidebar Tokens (green theme - old brand) ─────── */
+    --sidebar-background: var(--brand-primary); /* #00783C in HSL tokens */
+    --sidebar-foreground: 210 40% 98%;          /* near-white for contrast */
+    --sidebar-primary:    var(--brand-primary);
     --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent:     217 92% 65%;   /* hover state (lighter) */
+    --sidebar-accent:     150 90% 32%;          /* lighter green for hovers if needed */
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border:     217 92% 40%;   /* subtle blue border */
-    --sidebar-ring:       217 91% 60%;
+    --sidebar-border:     150 50% 20%;          /* subtle darker green */
+    --sidebar-ring:       var(--brand-primary);
   }
 
   .dark {
