@@ -87,8 +87,8 @@ leia: @planning/menu_map.md.md da linha 631 a linha 867 para você entender os E
 
 
 Contexto do projeto:
-  Estamos construindo um clone funcional do SmartOLT (sistema de gerenciamento de rede GPON). As fotos de  
-  referência da UX original estão em photosolt/. O planejamento de endpoints e features está em
+
+  Estamos construindo um clone funcional do SmartOLT (sistema de gerenciamento de rede GPON). As fotos de   referência da UX original estão em photosolt/. O planejamento de endpoints e features está em
   planning/menu_map.md.md linhas 631–867. Nossas migrations estão em
   smartolt/infrastructure/database/migrations/. O backend é Node/Express + Supabase em
   smartolt/backend/src/. O frontend é Next.js em smartolt/frontend/app/(dashboard)/.

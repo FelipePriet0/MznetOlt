@@ -196,6 +196,11 @@ export default function DashboardPage() {
           if (anySuccess) setKpiUpdatedAt(Date.now())
         }
       } else {
+        // Reset KPI values to zero for the selected OLT while recomputing
+        if (!abort) {
+          setKpi({ waiting: 0, online: 0, offline: 0, low: 0 })
+          setKpiBreak({ online: { total_authorized: 0 }, low: { warning: 0, critical: 0 } })
+        }
         // OLT-specific: compute each piece independently
         const updates: Partial<{ waiting: number; online: number; offline: number; low: number }> = {}
         const bUpdates: typeof kpiBreak = {}
@@ -321,7 +326,11 @@ export default function DashboardPage() {
                           value={display(w)}
                           icon={Clock}
                           accent="warning"
-                          onClick={() => router.push('/onus/unconfigured')}
+                          onClick={() => {
+                            const base = '/onus/unconfigured'
+                            const url = selectedOlt ? `${base}?olt_id=${selectedOlt}` : base
+                            router.push(url)
+                          }}
                           bg="bg-[#0064C8]"
                           bright
                         />
@@ -333,7 +342,11 @@ export default function DashboardPage() {
                           ]}
                           icon={Wifi}
                           accent="success"
-                          onClick={() => router.push('/onus/configured')}
+                          onClick={() => {
+                            const base = '/onus/configured'
+                            const url = selectedOlt ? `${base}?olt_id=${selectedOlt}` : base
+                            router.push(url)
+                          }}
                           bg="bg-[#00783C]"
                           bright
                         />
@@ -347,7 +360,11 @@ export default function DashboardPage() {
                           ]}
                           icon={WifiOff}
                           accent="destructive"
-                          onClick={() => router.push('/onus/configured?status=offline')}
+                          onClick={() => {
+                            const base = '/onus/configured?status=offline'
+                            const url = selectedOlt ? `${base}&olt_id=${selectedOlt}` : base
+                            router.push(url)
+                          }}
                           bg="bg-[#4C4B4B]"
                           bright
                         />
@@ -360,7 +377,11 @@ export default function DashboardPage() {
                           ]}
                           icon={AlertTriangle}
                           accent="primary"
-                          onClick={() => router.push('/onus/configured?signal=warning,critical')}
+                          onClick={() => {
+                            const base = '/onus/configured?signal=warning,critical'
+                            const url = selectedOlt ? `${base}&olt_id=${selectedOlt}` : base
+                            router.push(url)
+                          }}
                           bg="bg-[#F7A127]"
                           bright
                         />

@@ -236,8 +236,16 @@ export default function OnusConfiguredPage() {
         setFilters(f => ({ ...f, signal_levels: levels as any, page: 1 }))
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+
+    const qOlt = searchParams.get('olt_id')
+    if (qOlt) {
+      const id = Number(qOlt)
+      if (!isNaN(id)) {
+        setOltSet(new Set([id]))
+        setFilters(f => ({ ...f, olt_ids: [id], page: 1 }))
+      }
+    }
+  }, [searchParams])
 
   // Atualiza filtros automaticamente ao digitar/apagar (debounced)
   useEffect(() => {

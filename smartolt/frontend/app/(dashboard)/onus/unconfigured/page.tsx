@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useApi } from '@/hooks/use-api'
 import { oltApi, type OltItem } from '@/lib/api/olt'
 import { unconfiguredApi, type UnconfiguredOnuItem } from '@/lib/api/unconfigured'
@@ -64,6 +65,7 @@ function GroupedTable({ title, items, onAuthorize }: { title: string; items: Unc
 }
 
 export default function UnconfiguredPage() {
+  const searchParams = useSearchParams()
   const [selectedOlt, setSelectedOlt] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -194,6 +196,15 @@ export default function UnconfiguredPage() {
       setBusy(false)
     }
   }
+
+  // Inicializa OLT via query param (quando vindo do Dashboard)
+  useEffect(() => {
+    const qOlt = searchParams.get('olt_id')
+    if (qOlt) {
+      const id = Number(qOlt)
+      if (!isNaN(id)) setSelectedOlt(id)
+    }
+  }, [searchParams])
 
   return (
     <div className="flex flex-col gap-6 p-6">

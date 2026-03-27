@@ -51,7 +51,7 @@ const navItems: NavItem[] = [
   },
   {
     // Authorization removida do menu; agora inline na página de Não configuradas
-    label: 'Settings',
+    label: 'Zones',
     href: '/settings',
     icon: <Settings className="w-5 h-5" />,
   },

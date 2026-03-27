@@ -13,6 +13,7 @@ export type VlansResponse = { items: VlanItem[] }
 export const settingsApi = {
   zones:       () => apiFetch<ZonesResponse>('/api/settings/zones'),
   createZone:  (name: string) => apiFetch<ZoneItem>('/api/settings/zones', { method: 'POST', body: JSON.stringify({ name }) }),
+  updateZone:  (id: number, name: string) => apiFetch<ZoneItem>(`/api/settings/zones/${id}`, { method: 'PATCH', body: JSON.stringify({ name }) }),
   deleteZone:  (id: number) => apiFetch<{ deleted: boolean }>(`/api/settings/zones/${id}`, { method: 'DELETE' }),
 
   vlans:       () => apiFetch<VlansResponse>('/api/settings/vlans'),
