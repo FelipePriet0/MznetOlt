@@ -27,7 +27,7 @@ export function AppSidebar() {
     { label: 'OLTs', href: '/olts', icon: Wifi },
     { label: 'Tickets', href: '/tickets', icon: BellDot },
     // Authorization removida do menu; agora inline na página de Não configuradas
-    { label: 'Configurações', href: '/settings', icon: Settings },
+    { label: 'Configurações', href: '/configuracoes', icon: Settings },
   ]
 
   return (

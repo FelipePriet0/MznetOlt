@@ -122,7 +122,7 @@ export default function OltsPage() {
             </div>
           </div>
 
-          <Button onClick={() => router.push('/olts/new')}>
+          <Button onClick={() => router.push('/olts/adicionar')}>
             <Plus className="h-4 w-4" />
             Nova OLT
           </Button>
