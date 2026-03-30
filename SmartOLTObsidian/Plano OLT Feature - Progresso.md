@@ -3,7 +3,6 @@
 > Baseado nas fotos da pasta `photosolt/` — UX idêntica ao SmartOLT original, UI nossa.
 
 ---
-
 ## Status Geral
 
 | #   | Feature            | Status      | Rota Frontend                  | Observações                                                                                                                                                                                           |

@@ -491,7 +491,7 @@ Permite alterar o perfil de serviço aplicado à ONU.
 Executa operações críticas no equipamento: reboot, resync, factory reset, disable.
 
 **Endpoints prováveis**
-- `POST /onu/reboot`
+- `POST /onu/reboot`    
 - `POST /onu/resync`
 - `POST /onu/factory_reset`
 - `POST /onu/disable`

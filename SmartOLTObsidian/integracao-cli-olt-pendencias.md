@@ -144,16 +144,16 @@ E insira uma linha em `onu_traffic_samples` com os deltas calculados em Mbps.
 
 ## Status atual no sistema
 
-| Funcionalidade | Status | Bloqueio |
-|---|---|---|
-| RX Power | ✅ Funcionando (banco) | — |
-| TX Power | ⚠️ Placeholder `null` | CLI OLT |
-| Temperatura | ⚠️ Placeholder | CLI OLT |
-| Distância | ⚠️ Placeholder | CLI OLT |
-| Fabricante/Modelo | ⚠️ Placeholder `null` | Tabela `onu_types` removida |
-| Firmware | ⚠️ Placeholder `null` | CLI OLT |
-| Tráfego AO VIVO | ⚠️ Tabela vazia | Agente coleta |
-| MACs | ❌ Não implementado | CLI OLT + tabela |
-| Status básico | ✅ Funcionando (banco) | — |
-| Config em execução | ✅ Funcionando (banco) | — |
-| Portas Ethernet | ✅ Funcionando (banco) | — |
+| Funcionalidade     | Status                | Bloqueio                    |
+| ------------------ | --------------------- | --------------------------- |
+| RX Power           | ✅ Funcionando (banco) | —                           |
+| TX Power           | ⚠️ Placeholder `null` | CLI OLT                     |
+| Temperatura        | ⚠️ Placeholder        | CLI OLT                     |
+| Distância          | ⚠️ Placeholder        | CLI OLT                     |
+| Fabricante/Modelo  | ⚠️ Placeholder `null` | Tabela `onu_types` removida |
+| Firmware           | ⚠️ Placeholder `null` | CLI OLT                     |
+| Tráfego AO VIVO    | ⚠️ Tabela vazia       | Agente coleta               |
+| MACs               | ❌ Não implementado    | CLI OLT + tabela            |
+| Status básico      | ✅ Funcionando (banco) | —                           |
+| Config em execução | ✅ Funcionando (banco) | —                           |
+| Portas Ethernet    | ✅ Funcionando (banco) | —                           |

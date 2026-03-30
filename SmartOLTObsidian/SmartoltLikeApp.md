@@ -176,12 +176,13 @@ Tela Authorization
 AuthorizationService
    │
    ├── lê:
+   │    authorization_presets
+   │    authorization_preset_profiles
    │    onu_types
    │    speed_profiles
    │    vlans
-   │    tr069_profiles
-   │    voip_profiles
-   │    presets
+   │    (Opcional/Futuro) tr069_profiles
+   │    (Opcional/Futuro) voip_profiles
    ├── envia comandos para OLT
    └── grava:
    │    onu_authorizations
@@ -238,13 +239,10 @@ Banco + Engine OLT
 ─────────────
 OLT / ONUs
    │
-   ├── sinal óptico
-   ├── tráfego ONU
-   ├── tráfego PON
-   ├── erros uplink
-   ├── octets uplink
-   ├── cpu/mem/temp OLT
-   └── uptime
+   ├── sinal óptico (ONU)
+   ├── tráfego ONU (bps)
+   ├── saúde OLT (cpu/mem/temp/uptime)
+   └── eventos de rede (quando aplicável)
    ▼
 Coletor / Poller / Worker
    │
@@ -252,11 +250,9 @@ Coletor / Poller / Worker
    ├── atualiza dashboards
    └── alimenta gráficos
    ▼
-onu_signal_samples
+onu_signal_history
 onu_traffic_samples
-pon_traffic_samples
-uplink_samples
-olt_health_samples
+network_status_samples
 
 9) SETTINGS
 ───────────
@@ -266,9 +262,9 @@ Settings
    ├── ONU Types
    ├── Zones
    ├── Locations
-   ├── ODBs
-   ├── VoIP Profiles
-   ├── ACLs
+   ├── VLANs
+   ├── (Opcional/Futuro) VoIP Profiles
+   ├── (Opcional/Futuro) ACLs
    └── Advanced OLT Settings
    ▼
 SettingsService
@@ -282,21 +278,18 @@ Banco
 
 10) REPORTS
 ───────────
-Reports
+Reports (Planejado)
    │
-   ├── tasks
    ├── exportações
    ├── relatórios de autorização
-   ├── importação
-   └── export_authorizations
+   └── importação
    ▼
 ReportsService
    │
    ├── lê banco
-   ├── gera arquivos
-   └── registra tasks/exports
+   └── gera arquivos
    ▼
-report_tasks / report_exports
+(Tabelas a definir em fase futura)
 
 11) DIAGNOSTICS
 ───────────────
@@ -312,11 +305,11 @@ DiagnosticsService
    ├── chama OLT
    └── grava resultado
    ▼
-Banco + Engine OLT
+diagnostic_rules / diagnostic_tickets / ticket_events
 
 12) AUTOMAÇÕES
 ──────────────
-Ações automáticas
+Ações automáticas (Planejado)
    │
    ├── regras de auto-authorization
    ├── fila de tasks
@@ -325,12 +318,11 @@ Ações automáticas
    ▼
 Worker de automação
    │
-   ├── lê auto_auth_rules
    ├── consome ONUs detectadas
    ├── chama AuthorizationService
-   └── grava auto_auth_tasks
+   └── registra execução
    ▼
-Banco + Engine OLT
+(Tabelas a definir em fase futura)
 
 ══════════════════════════════ CONTROLE DE ACESSO ════════════════════════════════
 

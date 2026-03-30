@@ -1,8 +1,7 @@
+"use client"
 export const dynamic = 'force-dynamic'
 
-"use client"
-
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useApi } from '@/hooks/use-api'
 import { onuApi, type OnuItem, type OnuListFilters } from '@/lib/api/onu'
@@ -136,7 +135,7 @@ function multiLabel<T extends number>(
 type StatusIconKey = 'online' | 'power_fail' | 'loss_signal' | 'offline' | 'admin_disabled'
 
 /* ─── Page ────────────────────────────────────────────────────── */
-export default function OnusConfiguredPage() {
+function OnusConfiguredPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -704,5 +703,13 @@ export default function OnusConfiguredPage() {
         rowClassName="odd:bg-[hsl(var(--secondary))]/20 odd:hover:bg-[hsl(var(--secondary))]/20 hover:bg-transparent border-none"
       />
     </div>
+  )
+}
+
+export default function OnusConfiguredPage() {
+  return (
+    <Suspense fallback={<div className="p-4 text-xs text-muted-foreground">Carregando…</div>}>
+      <OnusConfiguredPageInner />
+    </Suspense>
   )
 }

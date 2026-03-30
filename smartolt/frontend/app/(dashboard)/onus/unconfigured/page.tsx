@@ -1,8 +1,7 @@
+"use client"
 export const dynamic = 'force-dynamic'
 
-"use client"
-
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useApi } from '@/hooks/use-api'
 import { oltApi, type OltItem } from '@/lib/api/olt'
@@ -68,7 +67,7 @@ function GroupedTable({ title, items, onAuthorize }: { title: string; items: Unc
   )
 }
 
-export default function UnconfiguredPage() {
+function UnconfiguredPageInner() {
   const searchParams = useSearchParams()
   const [selectedOlt, setSelectedOlt] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
@@ -388,5 +387,13 @@ export default function UnconfiguredPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function UnconfiguredPage() {
+  return (
+    <Suspense fallback={<div className="p-4 text-xs text-muted-foreground">Carregando…</div>}>
+      <UnconfiguredPageInner />
+    </Suspense>
   )
 }
