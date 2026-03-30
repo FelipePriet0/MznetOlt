@@ -1,6 +1,6 @@
-## MZNET OLT (SmartOLT‑like)
+## MZNET OLT
 
-Plataforma para gestão de OLTs/ONUs com authorization, telemetria e diagnósticos — inspirada no SmartOLT.
+Plataforma para gestão de OLTs/ONUs com authorization, telemetria e diagnósticos.
 
 ## Overview
 - Objetivo: unificar visibilidade e operação de rede GPON (OLTs/ONUs) com automação segura e auditável.
@@ -107,4 +107,3 @@ Plataforma para gestão de OLTs/ONUs com authorization, telemetria e diagnóstic
 - Diagramas: `SmartOLTObsidian/MznetOLT diagram.md`, `SmartOLTObsidian/SmartoltLikeApp.md`
 - Migrações: `smartolt/infrastructure/database/migrations/`
 - MCP client: `mcp-client/`
-

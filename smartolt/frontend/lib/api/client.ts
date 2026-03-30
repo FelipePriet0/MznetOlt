@@ -47,7 +47,20 @@ export class ApiError extends Error {
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null
-  return localStorage.getItem('smartolt_token')
+  try {
+    const NEW_KEY = 'mznetolt_token'
+    const OLD_KEY = 'smartolt_token'
+    const newVal = localStorage.getItem(NEW_KEY)
+    if (newVal) return newVal
+    const oldVal = localStorage.getItem(OLD_KEY)
+    if (oldVal) {
+      localStorage.setItem(NEW_KEY, oldVal)
+      return oldVal
+    }
+    return null
+  } catch {
+    return null
+  }
 }
 
 interface FetchOptions extends RequestInit {

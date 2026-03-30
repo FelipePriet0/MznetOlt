@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: smartolt-backend
+    name: mznet-backend
     env: node
     rootDir: smartolt/backend
     plan: free

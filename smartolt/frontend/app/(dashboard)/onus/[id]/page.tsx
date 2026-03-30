@@ -792,7 +792,7 @@ export default function OnuDetailPage() {
         <div className="mt-3 space-y-2 text-xs text-muted-foreground flex items-start gap-2">
           <InfoIcon className="h-4 w-4 mt-0.5" />
           <div>
-            <p>O SmartOLT aloca IDs de ONU no intervalo de 0 a 127 para o canal GPON e no intervalo de 128 a 255 para os canais XG/XGS-PON.</p>
+            <p>O sistema aloca IDs de ONU no intervalo de 0 a 127 para o canal GPON e no intervalo de 128 a 255 para os canais XG/XGS-PON.</p>
             <p>Quando o intervalo de 128-255 estiver esgotado, serão alocados canais do intervalo de 0-127, tanto para GPON quanto para XG/XGS-PON.</p>
             <p>Dica: ONUs compatíveis com XGPON que foram previamente autorizadas no canal GPON devem ser alteradas para o canal XGPON para liberar IDs para as ONUs GPON.</p>
           </div>

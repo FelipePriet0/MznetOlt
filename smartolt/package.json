@@ -1,7 +1,7 @@
 {
-  "name": "smartolt",
+  "name": "mznetolt",
   "version": "0.1.0",
-  "description": "SmartOLT - Network Management System for ISP",
+  "description": "MZNET OLT - Network Management System for ISP",
   "private": true,
   "workspaces": [
     "frontend",

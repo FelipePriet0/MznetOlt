@@ -9,7 +9,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const lsToken = useMemo(() => {
     if (typeof window === 'undefined') return null
-    try { return localStorage.getItem('smartolt_token') } catch { return null }
+    try { return localStorage.getItem('mznetolt_token') || localStorage.getItem('smartolt_token') } catch { return null }
   }, [])
 
   useEffect(() => {

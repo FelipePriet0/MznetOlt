@@ -1,5 +1,5 @@
 {
-  "name": "@smartolt/workers",
+  "name": "@mznet/workers",
   "version": "0.1.0",
   "private": true,
   "type": "module",

@@ -314,7 +314,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">SmartOLT-like operational overview</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">Visão operacional</p>
         </div>
         {/* Removed manual refresh CTA */}
       </div>

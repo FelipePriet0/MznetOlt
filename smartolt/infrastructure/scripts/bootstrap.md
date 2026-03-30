@@ -1,6 +1,6 @@
 # Bootstrap Scripts
 
-Guia para bootstrap do projeto SmartOLT.
+Guia para bootstrap do projeto MZNET OLT.
 
 ## Pré-requisitos
 
@@ -40,7 +40,7 @@ cp infrastructure/env/.env.example .env.local
 
 ```bash
 # Criar banco de dados (quando schema for criado)
-createdb smartolt_dev
+createdb mznetolt_dev
 
 # Rodar migrações (quando estiverem prontas)
 pnpm db:migrate

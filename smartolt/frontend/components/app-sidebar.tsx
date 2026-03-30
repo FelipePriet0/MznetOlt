@@ -34,7 +34,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="space-y-1">
-          <h1 className="text-base font-bold">SmartOLT</h1>
+          <h1 className="text-base font-bold">MZNET OLT</h1>
           <p className="text-[11px] text-[hsl(var(--sidebar-foreground))]/80">Network Management</p>
         </div>
       </SidebarHeader>

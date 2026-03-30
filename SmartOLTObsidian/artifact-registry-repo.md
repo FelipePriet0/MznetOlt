@@ -45,18 +45,18 @@ docker push southamerica-east1-docker.pkg.dev/mznetolt/containers/smartolt-backe
 ```
 
 Convenções recomendadas
-- Nome da imagem: `smartolt-backend`
+- Nome da imagem: `mznet-backend`
 - Tag: `semver` (ex.: `1.0.0`) ou `data+sha` (ex.: `2026-03-27_abcdef1`)
 - Manter `latest` apenas como ponteiro, nunca como única referência de release
 
 Deploy no Cloud Run usando o repo próprio
 ```
-gcloud run deploy smartolt-backend \
+gcloud run deploy mznet-backend \
   --project=mznetolt \
   --region=southamerica-east1 \
   --platform=managed \
   --allow-unauthenticated \
-  --image=southamerica-east1-docker.pkg.dev/mznetolt/containers/smartolt-backend:v1 \
+  --image=southamerica-east1-docker.pkg.dev/mznetolt/containers/mznet-backend:v1 \
   --port=3001 \
   --set-env-vars SUPABASE_URL=https://<ref>.supabase.co,SUPABASE_ANON_KEY=<anon> \
   --set-secrets SUPABASE_SERVICE_ROLE_KEY=supabase-service-role-key:latest,JWT_SECRET=jwt-secret:latest \
