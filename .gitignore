@@ -6,3 +6,21 @@ smartolt/Mockups.txt
 smartolt/Tela 2 — Detalhe da ONU - Copia.md
 
 .vercel
+
+# Environment files
+.env
+.env.*
+
+# Node artifacts
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+.next/
+.out/
+coverage/
