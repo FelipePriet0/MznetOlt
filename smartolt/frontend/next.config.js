@@ -19,7 +19,12 @@ const nextConfig = {
       },
       {
         source: '/authorization',
-        destination: '/autorizacao',
+        destination: '/provisionar',
+        permanent: true,
+      },
+      {
+        source: '/autorizacao',
+        destination: '/provisionar',
         permanent: true,
       },
       {
