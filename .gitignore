@@ -10,6 +10,8 @@ smartolt/Tela 2 — Detalhe da ONU - Copia.md
 # Environment files
 .env
 .env.*
+!.env.example
+!**/.env.example
 
 # Node artifacts
 node_modules/
