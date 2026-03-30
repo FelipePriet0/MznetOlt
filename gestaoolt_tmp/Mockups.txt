@@ -1,0 +1,377 @@
+Mockup: Mover Onu
+
+Inputs
+ 
+- OLT (Popover com todas as OLTs + Caixa de Seleção + Campo de Busca, dando oportunidade de trocar a OLT pela própria UI, dentro do Popover) 
+
+- Quadro (Popover com todas os Quadros + Caixa de Seleção + Campo de Busca, dando oportunidade de trocar o Quadro pela própria UI, dentro do Popover)
+
+- Porta (Popover com todas as Portas + Caixa de Seleção + Campo de Busca, dando oportunidade de trocar as Portas pela própria UI, dentro do Popover)
+
+CTAs:
+
+Fechar -> Fecha Mockup. 
+Mover -> Confirma mudanças no banco de dados
+
+-----------------
+
+Mockup: Alterar ID ONU alocado
+
+
+- ID atual da ONU 44 (Campo Automático) 
+
+- ID da ONU alvo (Popover com ID de todas as ONUs + Caixa de Seleção + Campo de Busca, dando oportunidade de Alterar ID ONU alocado pela própria UI, dentro do Popover
+
+Mensagem com I abaixo: 
+
+ Esta ação moverá a ONU para um ID de ONU diferente na mesma placa/porta. A ONU será brevemente desconectada e ressincronizada durante o processo.
+
+CTAs: 
+
+Fechar -> Fecha Mockup.
+Aplicar -> Aplica mudanças no banco de dados
+
+-------------------------------
+
+Mockup: Atualizar canal GPON
+
+Inputs
+
+Canal GPON (Seleção por radio button entre os tipos de canal disponíveis: GPON, XG-PON e XGS-PON, permitindo alterar o tipo de canal utilizado pela ONU)
+
+Informações exibidas
+
+Texto informativo explicando a lógica de alocação de IDs de ONU:
+
+intervalo 0–127 para GPON
+
+intervalo 128–255 para XG/XGS-PON
+
+Informação sobre realocação automática caso o intervalo esteja esgotado
+
+Dica operacional sobre alteração de ONUs compatíveis com XGPON para liberar IDs de ONU GPON
+
+CTAs
+
+Fechar → Fecha o Mockup sem salvar alterações.
+
+Atualizar → Confirma a alteração do canal GPON no sistema.
+
+
+-------------------------
+
+
+Mockup: Substituir ONU por SN
+
+Inputs
+
+SN (Serial Number) (Campo de entrada para inserir o serial da nova ONU que irá substituir a atual + ícone de busca para pesquisar na lista de ONUs detectadas/não configuradas)
+
+Tipo ONU (Dropdown com os modelos de ONU compatíveis, permitindo selecionar o tipo de dispositivo que será provisionado)
+
+Informações exibidas
+
+Texto informativo indicando que a busca pelo SN pode ser realizada na lista de PONs não configuradas utilizando o botão de busca
+
+CTAs
+
+Fechar → Fecha o Mockup sem salvar alterações.
+
+Substituir → Confirma a substituição da ONU atual pela ONU informada através do SN.
+
+-----------------------------------
+
+Mockup: Alterar tipo de ONU
+
+Inputs
+
+Tipo ONU (Dropdown contendo os modelos de ONU disponíveis para configuração)
+
+Perfil personalizado (Dropdown contendo perfis de configuração previamente definidos para aplicação na ONU)
+
+CTAs
+
+Fechar → Fecha o Mockup sem salvar alterações.
+
+Mudar → Confirma a alteração do tipo de ONU e aplica a configuração selecionada no sistema.
+
+------------------------
+
+Mockup: Atualizar detalhes de localização
+
+Inputs
+
+Zona (Dropdown contendo as zonas cadastradas na rede, permitindo associar a ONU a uma zona geográfica ou operacional)
+
+ODB (Divisor) (Dropdown contendo os divisores ópticos cadastrados na zona selecionada)
+
+Porta ODB (Dropdown contendo as portas disponíveis do divisor selecionado)
+
+Nome (Campo de texto para identificação do cliente ou local associado à ONU)
+
+Endereço ou comentário (Campo de texto para registrar endereço físico ou observações relacionadas à instalação)
+
+Contato (Campo de texto para telefone ou outra forma de contato do cliente)
+
+Latitude (Campo de texto para inserir coordenada geográfica de latitude da instalação)
+
+Longitude (Campo de texto para inserir coordenada geográfica de longitude da instalação)
+
+Informações exibidas
+
+Mapa » (Link para abrir visualização de mapa com base nas coordenadas geográficas cadastradas)
+
+CTAs
+
+Fechar → Fecha o Mockup sem salvar alterações.
+
+Atualizar → Salva as alterações de localização e informações associadas à ONU no sistema.
+
+-------------------------------------
+
+Mockup: Histórico
+
+Informações exibidas
+
+Tabela de histórico de ações contendo:
+
+Ação (Descrição da operação realizada na ONU)
+
+Usuário (Usuário do sistema que executou a ação)
+
+Data (Data e horário em que a ação foi executada)
+
+Registro exibido contendo exemplo de autorização de ONU com identificação da PON.
+
+CTAs
+
+Ver todo o histórico → Abre a listagem completa do histórico de eventos relacionados à ONU.
+
+---------------------------------
+
+
+Mockup: Atualizar ID externo da ONU
+
+Inputs
+
+ID externo da ONU (Campo de texto para definir um identificador externo exclusivo para a ONU, utilizado para integração com APIs ou sistemas externos como faturamento)
+
+Informações exibidas
+
+Texto informativo explicando que o ID externo pode ser utilizado para integração com sistemas externos.
+
+CTAs
+
+Fechar → Fecha o Mockup sem salvar alterações.
+
+Atualizar → Salva o novo ID externo da ONU no sistema.
+
+--------------------------
+
+Mockup: Atualizar VLANs
+
+Inputs
+
+VLANs (Dropdown com as VLANs disponíveis no sistema, permitindo selecionar a VLAN que será associada à ONU)
+
+Informações exibidas
+
+Texto informativo orientando que todas as VLANs utilizadas pela ONU devem ser selecionadas na lista.
+
+Texto explicando que, após alterar as VLANs, é necessário acessar as configurações das portas Ethernet para atribuir corretamente as VLANs conforme desejado.
+
+CTAs
+
+Fechar → Fecha o Mockup sem salvar alterações.
+
+Atualizar → Salva a nova configuração de VLAN associada à ONU.
+
+---------------------------------
+
+Mockup: Atualizar modo ONU 
+
+Inputs
+
+ID da VLAN (Dropdown contendo as VLANs disponíveis para associação ao modo de operação da ONU)
+
+Modo ONU (Seleção por radio button para definir o modo de operação da ONU)
+
+Ponte (Modo Bridge, onde a ONU atua como ponte entre rede GPON e dispositivos do cliente)
+
+Informações exibidas
+
+Texto informativo orientando que, após alterar o ID da VLAN, deve-se verificar as configurações das portas Ethernet e atualizar as VLANs conforme necessário.
+
+CTAs
+
+Fechar → Fecha o Mockup sem salvar alterações.
+
+Atualizar → Salva as alterações no modo de operação da ONU.
+
+-------------------------
+
+Mockup: Gerenciamento de atualizações e VoIP IP
+
+Inputs
+
+Perfil TR069 (Dropdown contendo os perfis TR069 disponíveis para gerenciamento remoto da ONU)
+
+Gestão de IP (Seleção por radio button para definir a forma de atribuição de IP ao serviço VoIP)
+
+Inativo (Sem configuração de IP para o serviço)
+
+IP estático (Definição manual de IP para o serviço)
+
+DHCP (IP atribuído automaticamente via DHCP)
+
+ID da porta de serviço (Campo para definir a porta de serviço associada à configuração de VoIP/IP)
+
+CTAs
+
+Fechar → Fecha o Mockup sem salvar alterações.
+
+Atualizar → Salva as configurações de TR069 e gerenciamento de IP associadas à ONU.
+
+---------------------------------------
+
+Mockup: Configurar ID da porta de serviço
+
+Inputs
+
+ID da VLAN do usuário (Dropdown contendo as VLANs disponíveis para associação ao serviço do usuário)
+
+Modo de transformação de tags (Dropdown para definir a forma de manipulação das tags VLAN no tráfego da porta de serviço)
+
+Exemplo exibido: traduzir
+
+Velocidade de download (Dropdown contendo os perfis de velocidade disponíveis para download)
+
+Velocidade de upload (Dropdown contendo os perfis de velocidade disponíveis para upload)
+
+Informações exibidas
+
+Texto informativo orientando que novos perfis de velocidade podem ser criados no menu Configurações → Perfis de velocidade.
+
+CTAs
+
+Remover porta de serviço → Remove a configuração da porta de serviço associada à ONU.
+
+Fechar → Fecha o Mockup sem salvar alterações.
+
+Salvar → Salva as configurações da porta de serviço no sistema.
+
+--------------------------------
+
+Mockup: Configurar porta ethernet
+
+Inputs
+
+Status (Seleção por radio button para definir o estado da porta ethernet)
+
+Habilitado (porta ativa)
+
+Fechamento do porto (porta desativada)
+
+Modo (Seleção por radio button para definir o modo de operação da porta ethernet)
+
+Acesso
+
+Híbrido
+
+Porta-malas
+
+Transparente
+
+ID da VLAN (Dropdown contendo as VLANs disponíveis para associação à porta ethernet)
+
+Informações exibidas
+
+DHCP (Indicação do comportamento DHCP da porta, exibido como Sem controle)
+
+CTAs
+
+Fechar → Fecha o Mockup sem salvar alterações.
+
+Salvar → Salva as configurações da porta ethernet no sistema.
+
+
+-----------------------------
+
+
+Mockup: Configurar porta ethernet
+
+Inputs
+
+Status (Seleção por radio button para definir o estado da porta ethernet)
+
+Habilitado (porta ativa)
+
+Fechamento do porto (porta desativada)
+
+Modo (Seleção por radio button para definir o modo de operação da porta ethernet)
+
+Acesso
+
+Híbrido
+
+Porta-malas
+
+Transparente
+
+ID da VLAN (Dropdown contendo as VLANs disponíveis para associação à porta ethernet)
+
+Informações exibidas
+
+DHCP (Indicação do comportamento DHCP da porta, exibido como Sem controle)
+
+CTAs
+
+Fechar → Fecha o Mockup sem salvar alterações.
+
+Salvar → Salva as configurações da porta ethernet no sistema.
+
+---------------
+
+Configuração de Ações Automáticas
+
+Objeto
+
+Ações automáticas de ONU (Configuração de automações que permitem executar operações automaticamente em ONUs detectadas ou pendentes na rede)
+
+Inputs
+
+Selecione OLT(s)
+Define em quais OLTs as ações automáticas serão aplicadas.
+
+OLT (Dropdown com lista de OLTs cadastradas no sistema)
+
+Seção: Ações automáticas
+
+Permite habilitar ou desabilitar operações que serão executadas automaticamente pelo sistema.
+
+Opções disponíveis:
+
+Ressincronizar
+Ativa a automação que executa ressincronização automática de ONUs detectadas.
+
+Mover
+Permite que o sistema realize automaticamente o reposicionamento lógico da ONU na OLT quando necessário.
+
+Autorizar
+Permite que o sistema autorize automaticamente ONUs detectadas na rede, aplicando as regras e configurações padrão definidas.
+
+Finalizar
+Encerra o processo automático após a execução das ações configuradas.
+
+Controles adicionais
+
+Menos
+Oculta opções adicionais da configuração de automações.
+
+CTAs
+
+Fechar
+Fecha o painel sem salvar ou iniciar as ações configuradas.
+
+Começar
+Inicia a execução das ações automáticas configuradas para as OLTs selecionadas.

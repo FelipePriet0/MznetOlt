@@ -2,7 +2,7 @@ services:
   - type: web
     name: mznet-backend
     env: node
-    rootDir: smartolt/backend
+    rootDir: gestaoOLT/backend
     plan: free
     region: oregon
     autoDeploy: true

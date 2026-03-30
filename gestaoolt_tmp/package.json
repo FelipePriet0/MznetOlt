@@ -1,0 +1,30 @@
+{
+  "name": "mznetolt",
+  "version": "0.1.0",
+  "description": "Gestao OLTS - Network Management System for ISP",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "workers"
+  ],
+  "scripts": {
+    "dev": "npm run dev:frontend & npm run dev:backend & npm run dev:workers",
+    "dev:frontend": "npm -w frontend run dev",
+    "dev:backend": "npm -w backend run dev",
+    "dev:workers": "npm -w workers run dev",
+    "build": "npm run build -w frontend && npm run build -w backend && npm run build -w workers",
+    "build:frontend": "npm -w frontend run build",
+    "build:backend": "npm -w backend run build",
+    "build:workers": "npm -w workers run build",
+    "lint": "npm -w frontend run lint && npm -w backend run lint && npm -w workers run lint",
+    "type-check": "npm -w frontend run type-check && npm -w backend run type-check && npm -w workers run type-check"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

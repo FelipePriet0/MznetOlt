@@ -1,0 +1,1 @@
+{"query":"select current_user, current_setting(server_version) as server_version;"}

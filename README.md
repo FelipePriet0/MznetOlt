@@ -27,10 +27,10 @@ Plataforma para gestão de OLTs/ONUs com authorization, telemetria e diagnóstic
 - Integração OLT: drivers Base/Mock/Vendor (SSH/Telnet/SNMP conforme vendor).
 
 ## Estrutura do Repositório
-- `smartolt/frontend` — App Next.js (UI).
-- `smartolt/backend` — API Express (`src/api/*/routes.ts`).
-- `smartolt/workers` — Jobs de coleta/automação.
-- `smartolt/infrastructure/database/migrations` — Migrações SQL (fonte de schema).
+- `gestaoOLT/frontend` — App Next.js (UI).
+- `gestaoOLT/backend` — API Express (`src/api/*/routes.ts`).
+- `gestaoOLT/workers` — Jobs de coleta/automação.
+- `gestaoOLT/infrastructure/database/migrations` — Migrações SQL (fonte de schema).
 - `SmartOLTObsidian` — Documentação operacional (inclui guia do Gestor).
 - `mcp-client` — Cliente MCP para Supabase (inspeção/admin segura).
 
@@ -45,17 +45,17 @@ Plataforma para gestão de OLTs/ONUs com authorization, telemetria e diagnóstic
 - MCP/Automação (opcional): `MCP_URL`, `SUPABASE_MCP_TOKEN`
 
 ## Setup Rápido (local)
-1) Banco: aplicar migrações em `smartolt/infrastructure/database/migrations` (via Supabase Studio/CLI)
+1) Banco: aplicar migrações em `gestaoOLT/infrastructure/database/migrations` (via Supabase Studio/CLI)
 2) Backend:
-- `cd smartolt/backend && npm install && npm run dev`
+- `cd gestaoOLT/backend && npm install && npm run dev`
 - Healthcheck: `GET /health`
 3) Frontend:
-- `cd smartolt/frontend && npm install && npm run dev`
+- `cd gestaoOLT/frontend && npm install && npm run dev`
 4) Workers (quando necessário):
-- `cd smartolt/workers && npm install && npm run dev`
+- `cd gestaoOLT/workers && npm install && npm run dev`
 
 ## Banco e Migrações
-- Fonte: `smartolt/infrastructure/database/migrations`
+- Fonte: `gestaoOLT/infrastructure/database/migrations`
 - Tabelas‑chave: `olts`, `boards`, `pon_ports`, `onus`, `authorization_presets`, `authorization_preset_profiles`, `onu_network_snapshots`, `onu_signal_history`, `onu_traffic_samples`, `network_status_samples`, `uplink_ports`, `olt_backups`, `diagnostic_*`
 - Apêndice operacional (payload mínimo/constraints): ver “Apêndice A” no guia do Gestor.
 
@@ -67,7 +67,7 @@ Plataforma para gestão de OLTs/ONUs com authorization, telemetria e diagnóstic
 
 ## API
 - Auth: `POST /api/auth/login`, `GET /api/auth/me` (JWT)
-- OLTs/Boards/PON/Uplinks/Backups: rotas em `smartolt/backend/src/api/olt/routes.ts`
+- OLTs/Boards/PON/Uplinks/Backups: rotas em `gestaoOLT/backend/src/api/olt/routes.ts`
 - ONUs: lista/status/detalhe/ações/telemetria em `.../api/onu/routes.ts`
 - Authorization (backend): presets e execução em `.../api/authorization/routes.ts`
 - Settings (backend): zones e VLANs em `.../api/settings/routes.ts`
@@ -111,5 +111,5 @@ Plataforma para gestão de OLTs/ONUs com authorization, telemetria e diagnóstic
 ## Referências
 - Guia do Gestor: `SmartOLTObsidian/Entregas e Próximos Passos (Gestor de Rotas).md`
 - Diagramas: `SmartOLTObsidian/MznetOLT diagram.md`, `SmartOLTObsidian/SmartoltLikeApp.md`
-- Migrações: `smartolt/infrastructure/database/migrations/`
+- Migrações: `gestaoOLT/infrastructure/database/migrations/`
 - MCP client: `mcp-client/`
