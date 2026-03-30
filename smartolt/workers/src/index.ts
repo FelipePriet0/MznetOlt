@@ -1,5 +1,5 @@
 /**
- * MZNET OLT Workers
+ * Gestao OLTS Workers
  *
  * Asynchronous job processor for background tasks.
  * Handles:
@@ -8,12 +8,12 @@
  * - Status refresh and monitoring
  */
 
-console.log('[MZNET OLT Workers] Starting worker processor...')
-console.log('[MZNET OLT Workers] Environment:', process.env.NODE_ENV || 'development')
+console.log('[Gestao OLTS Workers] Starting worker processor...')
+console.log('[Gestao OLTS Workers] Environment:', process.env.NODE_ENV || 'development')
 
 // TODO: Initialize job queue (BullMQ or similar)
 // TODO: Register job handlers
 // TODO: Start queue processing
 // TODO: Setup monitoring and error handling
 
-console.log('[MZNET OLT Workers] Waiting for implementation...')
+console.log('[Gestao OLTS Workers] Waiting for implementation...')

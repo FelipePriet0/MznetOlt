@@ -1,6 +1,6 @@
 # Bootstrap Scripts
 
-Guia para bootstrap do projeto MZNET OLT.
+Guia para bootstrap do projeto Gestao OLTS.
 
 ## Pré-requisitos
 

@@ -3,7 +3,7 @@ import { AuthProvider } from '@/lib/auth/context'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'MZNET OLT – Network Management',
+  title: 'Gestao OLTS – Network Management',
   description: 'GPON network management system for ISPs',
 }
 

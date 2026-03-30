@@ -91,7 +91,7 @@ export function Sidebar() {
         <div className="h-screen flex flex-col">
           {/* Logo/Header */}
           <div className="p-6">
-            <h1 className="text-xl font-bold tracking-tight">MZNET OLT</h1>
+            <h1 className="text-xl font-bold tracking-tight">Gestao OLTS</h1>
             <p className="text-xs text-white mt-1">
               Network Management
             </p>
@@ -160,7 +160,7 @@ export function Sidebar() {
 
             {/* Version */}
             <div className="px-1 text-[10px] text-muted-foreground/60">
-              MZNET OLT v0.1.0 · Em desenvolvimento
+              Gestao OLTS v0.1.0 · Em desenvolvimento
             </div>
           </div>
         </div>
