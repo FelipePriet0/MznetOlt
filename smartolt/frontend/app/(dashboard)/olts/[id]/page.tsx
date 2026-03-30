@@ -477,13 +477,13 @@ export default function OltDetailPage() {
                               </td>
                               <td className="px-4 py-3">
                                 <button
-                                  onClick={() => router.push(`/onus/configured?pon_port_id=${p.id}&status=online`)}
+                                  onClick={() => router.push(`/onus/configuradas?pon_port_id=${p.id}&status=online`)}
                                   className="block text-xs text-primary hover:underline font-medium"
                                 >
                                   Online: {p.onu_online}
                                 </button>
                                 <button
-                                  onClick={() => router.push(`/onus/configured?pon_port_id=${p.id}`)}
+                                  onClick={() => router.push(`/onus/configuradas?pon_port_id=${p.id}`)}
                                   className="block text-xs text-primary hover:underline font-medium"
                                 >
                                   Total: {p.onu_total}

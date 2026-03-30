@@ -353,7 +353,7 @@ export default function DashboardPage() {
                           icon={Clock}
                           accent="warning"
                           onClick={() => {
-                            const base = '/onus/unconfigured'
+                            const base = '/onus/naoconfiguradas'
                             const url = selectedOlt ? `${base}?olt_id=${selectedOlt}` : base
                             router.push(url)
                           }}
@@ -369,7 +369,7 @@ export default function DashboardPage() {
                           icon={Wifi}
                           accent="success"
                           onClick={() => {
-                            const base = '/onus/configured'
+                            const base = '/onus/configuradas'
                             const url = selectedOlt ? `${base}?olt_id=${selectedOlt}` : base
                             router.push(url)
                           }}
@@ -387,7 +387,7 @@ export default function DashboardPage() {
                           icon={WifiOff}
                           accent="destructive"
                           onClick={() => {
-                            const base = '/onus/configured?status=offline'
+                            const base = '/onus/configuradas?status=offline'
                             const url = selectedOlt ? `${base}&olt_id=${selectedOlt}` : base
                             router.push(url)
                           }}
@@ -404,7 +404,7 @@ export default function DashboardPage() {
                           icon={AlertTriangle}
                           accent="primary"
                           onClick={() => {
-                            const base = '/onus/configured?signal=warning,critical'
+                            const base = '/onus/configuradas?signal=warning,critical'
                             const url = selectedOlt ? `${base}&olt_id=${selectedOlt}` : base
                             router.push(url)
                           }}

@@ -31,12 +31,12 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Não configuradas',
-    href: '/onus/unconfigured',
+    href: '/onus/naoconfiguradas',
     icon: <Smartphone className="w-5 h-5" />,
   },
   {
     label: 'Configuradas',
-    href: '/onus/configured',
+    href: '/onus/configuradas',
     icon: <Smartphone className="w-5 h-5" />,
   },
   {

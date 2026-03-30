@@ -22,8 +22,8 @@ export function AppSidebar() {
 
   const items = [
     { label: 'Dashboard', href: '/dashboard', icon: BarChart3 },
-    { label: 'Não configuradas', href: '/onus/unconfigured', icon: Smartphone },
-    { label: 'Configuradas', href: '/onus/configured', icon: Smartphone },
+    { label: 'Não configuradas', href: '/onus/naoconfiguradas', icon: Smartphone },
+    { label: 'Configuradas', href: '/onus/configuradas', icon: Smartphone },
     { label: 'OLTs', href: '/olts', icon: Wifi },
     { label: 'Tickets', href: '/tickets', icon: BellDot },
     // Authorization removida do menu; agora inline na página de Não configuradas
