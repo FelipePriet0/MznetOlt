@@ -191,7 +191,7 @@ Segurança
 
 ## 10) Referências
 
-- Diagramas: `MznetObsidian/MznetOLT diagram.md`, `MznetObsidian/SmartoltLikeApp.md`
+- Diagramas: `GestaoOLTSObsidian/MznetOLT diagram.md`, `GestaoOLTSObsidian/GestaoOLTLikeApp.md`
 - Migrations: `smartolt/infrastructure/database/migrations/`
 - Endpoints: `smartolt/backend/src/api/*/routes.ts`
 - MCP: `mcp-client/` (inspeção/automação controlada)

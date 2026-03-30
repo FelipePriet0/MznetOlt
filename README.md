@@ -9,7 +9,7 @@ Plataforma para gestão de OLTs/ONUs com authorization, telemetria e diagnóstic
 
 ## Arquitetura
 - Frontend (Next.js App Router, shadcn/ui) → API (Express/JWT) → Banco (Postgres/Supabase) → Workers (telemetria/sync) → Drivers OLT (SSH/Telnet/SNMP).
-- Diagramas: `SmartOLTObsidian/MznetOLT diagram.md`, `SmartOLTObsidian/SmartoltLikeApp.md`
+- Diagramas: `GestaoOLTSObsidian/MznetOLT diagram.md`, `GestaoOLTSObsidian/GestaoOLTLikeApp.md`
 
 ## Principais Features
 - ONUs: lista/detalhe, status, telemetria (sinal/tráfego), ações (resync/disable), portas Ethernet.
@@ -110,6 +110,6 @@ Plataforma para gestão de OLTs/ONUs com authorization, telemetria e diagnóstic
 
 ## Referências
 - Guia do Gestor: `SmartOLTObsidian/Entregas e Próximos Passos (Gestor de Rotas).md`
-- Diagramas: `SmartOLTObsidian/MznetOLT diagram.md`, `SmartOLTObsidian/SmartoltLikeApp.md`
+- Diagramas: `GestaoOLTSObsidian/MznetOLT diagram.md`, `GestaoOLTSObsidian/GestaoOLTLikeApp.md`
 - Migrações: `gestaoOLT/infrastructure/database/migrations/`
 - MCP client: `mcp-client/`
