@@ -13,9 +13,9 @@ Plataforma para gestão de OLTs/ONUs com authorization, telemetria e diagnóstic
 
 ## Principais Features
 - ONUs: lista/detalhe, status, telemetria (sinal/tráfego), ações (resync/disable), portas Ethernet.
-- OLTs: cadastro, boards, PONs, uplinks, backups, settings avançadas.
-- Authorization: presets + perfis por tipo de ONU, execução e registro de autorizações.
-- Settings: zones, locations, VLANs, speed profiles, onu types.
+- OLTs: cadastro, boards, PONs, uplinks, BACKUPS, configurações avançadas.
+- Provisionar: presets + perfis por tipo de ONU, execução e registro de autorizações.
+- Configurações: zones, locations, VLANs, speed profiles, onu types.
 - Dashboard: resumos e gráficos com amostras históricas.
 - Diagnostics: regras, tickets e eventos (observabilidade operacional).
 
@@ -69,10 +69,16 @@ Plataforma para gestão de OLTs/ONUs com authorization, telemetria e diagnóstic
 - Auth: `POST /api/auth/login`, `GET /api/auth/me` (JWT)
 - OLTs/Boards/PON/Uplinks/Backups: rotas em `smartolt/backend/src/api/olt/routes.ts`
 - ONUs: lista/status/detalhe/ações/telemetria em `.../api/onu/routes.ts`
-- Authorization: presets e execução em `.../api/authorization/routes.ts`
-- Settings: zones e VLANs em `.../api/settings/routes.ts`
+- Authorization (backend): presets e execução em `.../api/authorization/routes.ts`
+- Settings (backend): zones e VLANs em `.../api/settings/routes.ts`
 - Dashboard/Diagnostics: `.../api/dashboard/routes.ts`, `.../api/diagnostics/routes.ts`
 - Catálogo completo: `SmartOLTObsidian/Entregas e Próximos Passos (Gestor de Rotas).md`
+
+## Rotas do Frontend (PT‑BR)
+- `/provisionar` — Provisionar ONU (antes: `/authorization`)
+- `/onus/configuradas` — ONUs configuradas (redirect de `/onus/configured`)
+- `/onus/naoconfiguradas` — ONUs não configuradas (redirect de `/onus/unconfigured`)
+- `/configuracoes` — Configurações (zones, VLANs, perfis)
 
 ## Workers e Agendamentos
 - Telemetria → `onu_signal_history`, `onu_traffic_samples`, `network_status_samples`
