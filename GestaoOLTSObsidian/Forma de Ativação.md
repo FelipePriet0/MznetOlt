@@ -8,11 +8,11 @@ Documento de planejamento para automação do processo de ativação, aplicando 
 
 Automatizar e padronizar a ativação de clientes para reduzir retrabalho, acelerar liberação em campo e elevar a qualidade, com liberação automática quando todos os critérios forem atendidos e bloqueios claros quando houver risco.
 
-Resultados-alvo:
-- Reduzir tempo médio de ativação em X%.
-- Aumentar liberação automática para ≥ Y% dos casos.
-- Diminuir retrabalho (chamados até 7 dias pós-ativação) em Z%.
+Resultados alvo:
 
+- Reduzir tempo médio de ativação em 66% (Técnico não tem mais que esperar Leandro ativar e auditar sinal, ele mesmo (técnico) tem permissão de ativar no sistema).
+- Aumentar liberação a partir do Sistema, em outras palavras: A lei operacional do sistema decide se pode liberar o técnico ou não.
+- Diminuir trabalho interno em 66% (Hoje fazem: Checagem das fotos + Ativação na SmarOLT + Checagem do Sinal / Proposta: Fazer apenas checagem da foto, Ativação os técnicos fazem e checagem de sinal fica na mão do própria Sistema)
 ---
 
 ## 2) Fluxo Atual vs. Fluxo Proposto
@@ -24,15 +24,13 @@ Técnico instala → ONU aparece na OLT → equipe interna confere sinal + fotos
 
 Fluxo proposto (automatizado “Por que não”):
 ```
-Técnico instala → ONU detectada → sistema verifica sinal + provisionamento + conectividade →
-upload de fotos guiado → validações objetivas + LLM → política de decisão aplica regras →
-liberação automática (ou revisão rápida / bloqueio) → técnico liberado
+Técnico instala → ONU detectada → sistema verifica sinal e aponta na interface-> Próprio técnico ativa -> Sistema valida a ativação dentro das regras/politicas de sinal -> Libera o técnico / Sugere mudanças para baixar o sinal.
 ```
 
 Princípios:
+
 - Evidência antes de decisão (checklist e dados objetivos).
-- Regras por provedor (limiares, itens obrigatórios, tolerâncias).
-- Estado e auditoria claros; deduplicação e retries por etapa.
+- Politica de sinal máximo (Sistema só libera instalação como "OK" se bater checklist da politica de sinal).
 
 ---
 
